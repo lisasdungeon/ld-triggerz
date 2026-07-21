@@ -1,0 +1,38 @@
+{
+  "id": "ld-triggerz",
+  "title": "LD Triggerz",
+  "description": "System-agnostic trigger automation and condition control for Foundry VTT.",
+  "authors": [
+    {
+      "name": "Lisa's Dungeon",
+      "url": "https://github.com/lisasdungeon",
+      "discord": "mystrysslysa_97536"
+    }
+  ],
+  "version": "1.0.3",
+  "compatibility": {
+    "minimum": 13,
+    "verified": 14
+  },
+  "url": "https://github.com/lisasdungeon/ld-triggerz",
+  "patreon": "https://patreon.com/LisasDungeon?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink",
+  "manifest": "https://github.com/lisasdungeon/ld-triggerz/releases/latest/download/module.json",
+  "download": "https://github.com/lisasdungeon/ld-triggerz/releases/download/v1.0.3/ld-triggerz.zip",
+  "readme": "https://github.com/lisasdungeon/ld-triggerz/blob/main/README.md",
+  "changelog": "https://github.com/lisasdungeon/ld-triggerz/blob/main/CHANGELOG.md",
+  "license": "https://github.com/lisasdungeon/ld-triggerz/blob/main/LICENSE",
+  "esmodules": [
+    "main.js"
+  ],
+  "styles": [
+    "styles/ld-triggerz.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
+  "socket": true
+}

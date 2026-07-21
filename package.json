@@ -1,0 +1,28 @@
+{
+  "name": "ld-triggerz",
+  "version": "1.0.3",
+  "description": "System-agnostic trigger automation and condition control for Foundry VTT.",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "syntax": "node tests/check-syntax.mjs",
+    "validate": "node tests/validate.mjs",
+    "test": "node --test",
+    "test:coverage": "node --test --experimental-test-coverage --test-coverage-include=main.js --test-coverage-include=src/**/*.js --test-coverage-exclude=tests/**/*.js --test-coverage-lines=100 --test-coverage-branches=100 --test-coverage-functions=100",
+    "check": "npm run syntax && npm run validate && npm test"
+  },
+  "keywords": [
+    "foundryvtt",
+    "foundry",
+    "module",
+    "automation",
+    "triggers",
+    "conditions",
+    "ld"
+  ],
+  "license": "Proprietary",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lisasdungeon/ld-triggerz.git"
+  }
+}

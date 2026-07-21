@@ -1,0 +1,348 @@
+<section class="ld-triggerz-hub">
+  <header class="ld-triggerz-header">
+    <div>
+      <h2>{{localize "LDTRIGGERZ.GMHub.Title"}}</h2>
+      <p>{{moduleMode}} | {{mode}} | v{{version}}</p>
+    </div>
+    <button type="button" data-action="refresh">{{localize "LDTRIGGERZ.GMHub.Refresh"}}</button>
+  </header>
+
+  <div class="ld-triggerz-summary">
+    <div class="ld-triggerz-stat">
+      <strong>{{triggerCount}}</strong>
+      <span>{{localize "LDTRIGGERZ.GMHub.Triggers"}}</span>
+    </div>
+    <div class="ld-triggerz-stat">
+      <strong>{{conditionCount}}</strong>
+      <span>{{localize "LDTRIGGERZ.GMHub.Conditions"}}</span>
+    </div>
+    <div class="ld-triggerz-stat">
+      <strong>{{selectedTokenCount}}</strong>
+      <span>{{localize "LDTRIGGERZ.GMHub.Selected"}}</span>
+    </div>
+  </div>
+
+  <section class="ld-triggerz-panel">
+    <h3>{{localize "LDTRIGGERZ.GMHub.SelectedTokens"}}</h3>
+    <div class="ld-triggerz-selected-grid">
+      <label>
+        <span>{{localize "LDTRIGGERZ.GMHub.Condition"}}</span>
+        <select data-ld-triggerz-selected-condition>
+          {{#each conditionOptions}}
+            <option value="{{value}}">{{label}}</option>
+          {{/each}}
+        </select>
+      </label>
+      <label>
+        <span>{{localize "LDTRIGGERZ.GMHub.CustomCondition"}}</span>
+        <input type="text" data-ld-triggerz-selected-condition-custom placeholder="condition-id">
+      </label>
+      <div class="ld-triggerz-actions">
+        <button type="button" data-action="assign-selected">{{localize "LDTRIGGERZ.GMHub.Assign"}}</button>
+        <button type="button" data-action="unassign-selected">{{localize "LDTRIGGERZ.GMHub.Unassign"}}</button>
+        <button type="button" data-action="apply-selected">{{localize "LDTRIGGERZ.GMHub.Apply"}}</button>
+        <button type="button" data-action="remove-selected">{{localize "LDTRIGGERZ.GMHub.Remove"}}</button>
+        <button type="button" data-action="toggle-selected">{{localize "LDTRIGGERZ.GMHub.Toggle"}}</button>
+      </div>
+    </div>
+    <ol class="ld-triggerz-token-list">
+      {{#each selectedTokens}}
+        <li>
+          <strong>{{name}}</strong>
+          <span>{{assignmentSummary}}</span>
+        </li>
+      {{else}}
+        <li>{{localize "LDTRIGGERZ.GMHub.NoSelectedTokens"}}</li>
+      {{/each}}
+    </ol>
+  </section>
+
+  <section class="ld-triggerz-grid">
+    <form class="ld-triggerz-panel ld-triggerz-form" data-ld-triggerz-condition-form>
+      <h3>{{localize "LDTRIGGERZ.GMHub.ConditionBuilder"}}</h3>
+      <label>
+        <span>{{localize "LDTRIGGERZ.GMHub.StatusEffect"}}</span>
+        <select name="statusId">
+          <option value="">{{localize "LDTRIGGERZ.GMHub.CustomStatus"}}</option>
+          {{#each statusOptions}}
+            <option value="{{value}}">{{label}}</option>
+          {{/each}}
+        </select>
+      </label>
+      <label>
+        <span>{{localize "LDTRIGGERZ.GMHub.ConditionId"}}</span>
+        <input type="text" name="conditionId" placeholder="condition-id">
+      </label>
+      <label>
+        <span>{{localize "LDTRIGGERZ.GMHub.ConditionName"}}</span>
+        <input type="text" name="conditionName" placeholder="Condition Name">
+      </label>
+      <label>
+        <span>{{localize "LDTRIGGERZ.GMHub.IconPath"}}</span>
+        <div class="ld-triggerz-file-row">
+          <input type="text" name="conditionImg" placeholder="icons/svg/aura.svg">
+          <button type="button" data-action="browse-icon">{{localize "LDTRIGGERZ.GMHub.Browse"}}</button>
+        </div>
+      </label>
+      <label>
+        <span>{{localize "LDTRIGGERZ.GMHub.Description"}}</span>
+        <textarea name="conditionDescription" rows="3" placeholder="{{localize "LDTRIGGERZ.GMHub.DescriptionPlaceholder"}}"></textarea>
+      </label>
+      <div class="ld-triggerz-inline">
+        <label>
+          <span>{{localize "LDTRIGGERZ.GMHub.ApplyTrigger"}}</span>
+          <select name="applyTriggerId">
+            {{#if triggerOptions.length}}
+              <option value="">{{localize "LDTRIGGERZ.GMHub.NoTrigger"}}</option>
+              {{#each triggerOptions}}
+                <option value="{{value}}">{{label}}</option>
+              {{/each}}
+            {{else}}
+              <option value="">{{localize "LDTRIGGERZ.GMHub.NoTriggersYet"}}</option>
+            {{/if}}
+          </select>
+        </label>
+        <label>
+          <span>{{localize "LDTRIGGERZ.GMHub.RemoveTrigger"}}</span>
+          <select name="removeTriggerId">
+            {{#if triggerOptions.length}}
+              <option value="">{{localize "LDTRIGGERZ.GMHub.NoTrigger"}}</option>
+              {{#each triggerOptions}}
+                <option value="{{value}}">{{label}}</option>
+              {{/each}}
+            {{else}}
+              <option value="">{{localize "LDTRIGGERZ.GMHub.NoTriggersYet"}}</option>
+            {{/if}}
+          </select>
+        </label>
+      </div>
+      <details class="ld-triggerz-effect-builder">
+        <summary>{{localize "LDTRIGGERZ.GMHub.HomebrewChanges"}}</summary>
+        <fieldset>
+          <legend>{{localize "LDTRIGGERZ.GMHub.HomebrewChangesLegend"}}</legend>
+          <div class="ld-triggerz-change-row">
+            <label>
+              <span>{{localize "LDTRIGGERZ.GMHub.ChangeKey"}}</span>
+              <input type="text" name="changeKey1" placeholder="system.path.value">
+            </label>
+            <label>
+              <span>{{localize "LDTRIGGERZ.GMHub.ChangeMode"}}</span>
+              <select name="changeMode1">
+                {{#each effectModeOptions}}
+                  <option value="{{value}}">{{label}}</option>
+                {{/each}}
+              </select>
+            </label>
+            <label>
+              <span>{{localize "LDTRIGGERZ.GMHub.ChangeValue"}}</span>
+              <input type="text" name="changeValue1" placeholder="-1 or system.props.path">
+            </label>
+            <label>
+              <span>{{localize "LDTRIGGERZ.GMHub.ChangePriority"}}</span>
+              <input type="number" name="changePriority1" placeholder="20">
+            </label>
+          </div>
+          <div class="ld-triggerz-change-row">
+            <label>
+              <span>{{localize "LDTRIGGERZ.GMHub.ChangeKey"}}</span>
+              <input type="text" name="changeKey2" placeholder="system.path.value">
+            </label>
+            <label>
+              <span>{{localize "LDTRIGGERZ.GMHub.ChangeMode"}}</span>
+              <select name="changeMode2">
+                {{#each effectModeOptions}}
+                  <option value="{{value}}">{{label}}</option>
+                {{/each}}
+              </select>
+            </label>
+            <label>
+              <span>{{localize "LDTRIGGERZ.GMHub.ChangeValue"}}</span>
+              <input type="text" name="changeValue2" placeholder="-1 or system.props.path">
+            </label>
+            <label>
+              <span>{{localize "LDTRIGGERZ.GMHub.ChangePriority"}}</span>
+              <input type="number" name="changePriority2" placeholder="20">
+            </label>
+          </div>
+          <div class="ld-triggerz-change-row">
+            <label>
+              <span>{{localize "LDTRIGGERZ.GMHub.ChangeKey"}}</span>
+              <input type="text" name="changeKey3" placeholder="system.path.value">
+            </label>
+            <label>
+              <span>{{localize "LDTRIGGERZ.GMHub.ChangeMode"}}</span>
+              <select name="changeMode3">
+                {{#each effectModeOptions}}
+                  <option value="{{value}}">{{label}}</option>
+                {{/each}}
+              </select>
+            </label>
+            <label>
+              <span>{{localize "LDTRIGGERZ.GMHub.ChangeValue"}}</span>
+              <input type="text" name="changeValue3" placeholder="-1 or system.props.path">
+            </label>
+            <label>
+              <span>{{localize "LDTRIGGERZ.GMHub.ChangePriority"}}</span>
+              <input type="number" name="changePriority3" placeholder="20">
+            </label>
+          </div>
+          <div class="ld-triggerz-change-row">
+            <label>
+              <span>{{localize "LDTRIGGERZ.GMHub.ChangeKey"}}</span>
+              <input type="text" name="changeKey4" placeholder="system.path.value">
+            </label>
+            <label>
+              <span>{{localize "LDTRIGGERZ.GMHub.ChangeMode"}}</span>
+              <select name="changeMode4">
+                {{#each effectModeOptions}}
+                  <option value="{{value}}">{{label}}</option>
+                {{/each}}
+              </select>
+            </label>
+            <label>
+              <span>{{localize "LDTRIGGERZ.GMHub.ChangeValue"}}</span>
+              <input type="text" name="changeValue4" placeholder="-1 or system.props.path">
+            </label>
+            <label>
+              <span>{{localize "LDTRIGGERZ.GMHub.ChangePriority"}}</span>
+              <input type="number" name="changePriority4" placeholder="20">
+            </label>
+          </div>
+        </fieldset>
+      </details>
+      <button type="submit">{{localize "LDTRIGGERZ.GMHub.SaveCondition"}}</button>
+    </form>
+
+    <form class="ld-triggerz-panel ld-triggerz-form" data-ld-triggerz-trigger-form>
+      <h3>{{localize "LDTRIGGERZ.GMHub.TriggerBuilder"}}</h3>
+      <label>
+        <span>{{localize "LDTRIGGERZ.GMHub.TriggerName"}}</span>
+        <input type="text" name="triggerName" placeholder="Example Trigger">
+      </label>
+      <label>
+        <span>{{localize "LDTRIGGERZ.GMHub.TriggerId"}}</span>
+        <input type="text" name="triggerId" placeholder="auto-generated">
+      </label>
+      <label>
+        <span>{{localize "LDTRIGGERZ.GMHub.ActorPath"}}</span>
+        <select name="triggerPath">
+          {{#each pathOptions}}
+            <option value="{{value}}">{{label}}</option>
+          {{/each}}
+        </select>
+      </label>
+      <label>
+        <span>{{localize "LDTRIGGERZ.GMHub.CustomPath"}}</span>
+        <input type="text" name="triggerPathCustom" placeholder="system.hp.value">
+      </label>
+      <div class="ld-triggerz-inline">
+        <label>
+          <span>{{localize "LDTRIGGERZ.GMHub.Operator"}}</span>
+          <select name="operator">
+            {{#each operatorOptions}}
+              <option value="{{value}}">{{label}}</option>
+            {{/each}}
+          </select>
+        </label>
+        <label>
+          <span>{{localize "LDTRIGGERZ.GMHub.Value"}}</span>
+          <input type="text" name="value" placeholder="target-value-or-system.path">
+        </label>
+      </div>
+      <label>
+        <span>{{localize "LDTRIGGERZ.GMHub.ComparePath"}}</span>
+        <input type="text" name="comparePath" placeholder="system.path.max">
+      </label>
+      <div class="ld-triggerz-inline">
+        <label>
+          <span>{{localize "LDTRIGGERZ.GMHub.Scope"}}</span>
+          <select name="scope">
+            {{#each scopeOptions}}
+              <option value="{{value}}">{{label}}</option>
+            {{/each}}
+          </select>
+        </label>
+        <label class="ld-triggerz-check">
+          <input type="checkbox" name="notZero">
+          <span>{{localize "LDTRIGGERZ.GMHub.NotZero"}}</span>
+        </label>
+      </div>
+      <div class="ld-triggerz-inline">
+        <label>
+          <span>{{localize "LDTRIGGERZ.GMHub.Action"}}</span>
+          <select name="actionType">
+            {{#each actionOptions}}
+              <option value="{{value}}">{{label}}</option>
+            {{/each}}
+          </select>
+        </label>
+        <label>
+          <span>{{localize "LDTRIGGERZ.GMHub.ActionCondition"}}</span>
+          <select name="actionCondition">
+            {{#each conditionOptions}}
+              <option value="{{value}}">{{label}}</option>
+            {{/each}}
+          </select>
+        </label>
+      </div>
+      <label>
+        <span>{{localize "LDTRIGGERZ.GMHub.MacroId"}}</span>
+        <input type="text" name="macroId" placeholder="macro-id-for-run-macro">
+      </label>
+      <button type="submit">{{localize "LDTRIGGERZ.GMHub.SaveTrigger"}}</button>
+    </form>
+  </section>
+
+  <section class="ld-triggerz-grid">
+    <section class="ld-triggerz-panel">
+      <h3>{{localize "LDTRIGGERZ.GMHub.ConfiguredConditions"}}</h3>
+      <ol class="ld-triggerz-list">
+        {{#each conditions}}
+          <li>
+            <img src="{{img}}" alt="">
+            <div>
+              <strong>{{label}}</strong>
+              <span>{{id}}</span>
+              <small>{{changeSummary}}</small>
+              {{#if applyTriggerSummary}}<small>{{localize "LDTRIGGERZ.GMHub.ApplyTrigger"}}: {{applyTriggerSummary}}</small>{{/if}}
+              {{#if removeTriggerSummary}}<small>{{localize "LDTRIGGERZ.GMHub.RemoveTrigger"}}: {{removeTriggerSummary}}</small>{{/if}}
+              {{#if description}}<small>{{description}}</small>{{/if}}
+            </div>
+            <button type="button" data-action="edit-condition" data-id="{{id}}">{{localize "LDTRIGGERZ.GMHub.Edit"}}</button>
+            <button type="button" data-action="delete-condition" data-id="{{id}}">{{localize "LDTRIGGERZ.GMHub.Delete"}}</button>
+          </li>
+        {{else}}
+          <li class="ld-triggerz-empty">{{localize "LDTRIGGERZ.GMHub.NoConditions"}}</li>
+        {{/each}}
+      </ol>
+    </section>
+
+    <section class="ld-triggerz-panel">
+      <h3>{{localize "LDTRIGGERZ.GMHub.ConfiguredTriggers"}}</h3>
+      <ol class="ld-triggerz-list">
+        {{#each triggers}}
+          <li>
+            <div>
+              <strong>{{name}}</strong>
+              <span>{{label}}</span>
+              <small>{{actionSummary}}</small>
+            </div>
+            <button type="button" data-action="edit-trigger" data-id="{{id}}">{{localize "LDTRIGGERZ.GMHub.Edit"}}</button>
+            <button type="button" data-action="delete-trigger" data-id="{{id}}">{{localize "LDTRIGGERZ.GMHub.Delete"}}</button>
+          </li>
+        {{else}}
+          <li class="ld-triggerz-empty">{{localize "LDTRIGGERZ.GMHub.NoTriggers"}}</li>
+        {{/each}}
+      </ol>
+    </section>
+  </section>
+
+  <details class="ld-triggerz-panel ld-triggerz-advanced">
+    <summary>{{localize "LDTRIGGERZ.GMHub.AdvancedImportExport"}}</summary>
+    <textarea data-ld-triggerz-export rows="8">{{exportJson}}</textarea>
+    <div class="ld-triggerz-actions">
+      <button type="button" data-action="export">{{localize "LDTRIGGERZ.GMHub.Export"}}</button>
+      <button type="button" data-action="import">{{localize "LDTRIGGERZ.GMHub.Import"}}</button>
+    </div>
+  </details>
+</section>

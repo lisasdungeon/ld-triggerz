@@ -1,0 +1,30 @@
+# Changelog
+
+## 1.0.3 - 2026-06-22
+
+- Added a Configure Settings menu launcher for the LD Triggerz GM Hub.
+- Added a `None` trigger action for triggers that only drive linked condition apply/remove rules.
+- Fixed CSB ActiveEffect math for `system.props.*` paths by converting add, multiply, and override values into CSB custom formulas.
+- Updated ActiveEffect value placeholders to show path/formula-friendly input.
+
+## 1.0.2 - 2026-06-21
+
+- Added condition-level Apply Trigger and Remove Trigger links so saved conditions can react to existing triggers.
+- Fixed the scene-control launcher to honor the Foundry settings toggle.
+
+## 1.0.1 - 2026-06-21
+
+- Added trigger comparisons where the value can resolve from an actor data path.
+- Fixed CSB trigger evaluation for flat Foundry update keys and numeric string comparisons.
+- Fixed token HUD actor-delta updates so token bar value edits trigger the same rules as sheet edits.
+- Fixed condition removal for Foundry ActiveEffect collections.
+- Fixed trigger actions so saved/custom condition data is resolved before apply, remove, or toggle.
+- Fixed path-value remove triggers for token delta actor data.
+- Fixed path-value remove triggers when CSB computed labels only exist on live prepared actor data.
+- Fixed CSB token-bar updates that arrive as system-relative actor paths such as `props.HP`.
+
+## 1.0.0
+
+- LD Triggerz v1 release foundation.
+- Added Bible-aligned root `main.js` and `src/` architecture.
+- Added trigger engine, condition adapter, GM hub shell, scene controls, socket boundary, storage, and strict validation.

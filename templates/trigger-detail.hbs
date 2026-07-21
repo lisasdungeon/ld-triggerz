@@ -1,0 +1,80 @@
+<form class="ld-triggerz-hub ld-triggerz-form" data-ld-triggerz-trigger-form>
+  <label>
+    <span>{{localize "LDTRIGGERZ.GMHub.TriggerName"}}</span>
+    <input type="text" name="triggerName" value="{{trigger.name}}" placeholder="Example Trigger">
+  </label>
+  <label>
+    <span>{{localize "LDTRIGGERZ.GMHub.TriggerId"}}</span>
+    <input type="text" name="triggerId" value="{{trigger.id}}" placeholder="auto-generated">
+  </label>
+  <label>
+    <span>{{localize "LDTRIGGERZ.GMHub.ActorPath"}}</span>
+    <select name="triggerPath">
+      {{#each pathOptions}}
+        <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+      {{/each}}
+    </select>
+  </label>
+  <label>
+    <span>{{localize "LDTRIGGERZ.GMHub.CustomPath"}}</span>
+    <input type="text" name="triggerPathCustom" value="{{trigger.customPath}}" placeholder="system.hp.value">
+  </label>
+  <div class="ld-triggerz-inline">
+    <label>
+      <span>{{localize "LDTRIGGERZ.GMHub.Operator"}}</span>
+      <select name="operator">
+        {{#each operatorOptions}}
+          <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+        {{/each}}
+      </select>
+    </label>
+    <label>
+      <span>{{localize "LDTRIGGERZ.GMHub.Value"}}</span>
+      <input type="text" name="value" value="{{trigger.value}}" placeholder="target-value-or-system.path">
+    </label>
+  </div>
+  <label>
+    <span>{{localize "LDTRIGGERZ.GMHub.ComparePath"}}</span>
+    <input type="text" name="comparePath" value="{{trigger.comparePath}}" placeholder="system.path.max">
+  </label>
+  <div class="ld-triggerz-inline">
+    <label>
+      <span>{{localize "LDTRIGGERZ.GMHub.Scope"}}</span>
+      <select name="scope">
+        {{#each scopeOptions}}
+          <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+        {{/each}}
+      </select>
+    </label>
+    <label class="ld-triggerz-check">
+      <input type="checkbox" name="notZero" {{#if trigger.notZero}}checked{{/if}}>
+      <span>{{localize "LDTRIGGERZ.GMHub.NotZero"}}</span>
+    </label>
+  </div>
+  <div class="ld-triggerz-inline">
+    <label>
+      <span>{{localize "LDTRIGGERZ.GMHub.Action"}}</span>
+      <select name="actionType">
+        {{#each actionOptions}}
+          <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+        {{/each}}
+      </select>
+    </label>
+    <label>
+      <span>{{localize "LDTRIGGERZ.GMHub.ActionCondition"}}</span>
+      <select name="actionCondition">
+        {{#each conditionOptions}}
+          <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+        {{/each}}
+      </select>
+    </label>
+  </div>
+  <label>
+    <span>{{localize "LDTRIGGERZ.GMHub.MacroId"}}</span>
+    <input type="text" name="macroId" value="{{trigger.macroId}}" placeholder="macro-id-for-run-macro">
+  </label>
+  <div class="ld-triggerz-actions">
+    <button type="submit">{{localize "LDTRIGGERZ.GMHub.SaveTrigger"}}</button>
+    <button type="button" data-action="delete-trigger" data-id="{{trigger.id}}">{{localize "LDTRIGGERZ.GMHub.Delete"}}</button>
+  </div>
+</form>
