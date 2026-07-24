@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.4 - 2026-07-24
+
+- Removed the unsupported `patreon` manifest field to resolve Foundry's "unknown keys" console warning.
+- Fixed the release zip packaging, which was shipping an empty `src/` directory instead of the module's actual source files.
+
 ## 1.0.3 - 2026-06-22
 
 - Added a Configure Settings menu launcher for the LD Triggerz GM Hub.
