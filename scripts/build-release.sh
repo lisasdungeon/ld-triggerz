@@ -25,7 +25,6 @@ zip -r "$ZIP_PATH" \
   README.md \
   LICENSE \
   CHANGELOG.md \
-  GENERATIVE_AI_CONTENT_DECLARATION.md \
   src \
   styles \
   templates \
