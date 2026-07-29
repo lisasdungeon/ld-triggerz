@@ -1,5 +1,6 @@
 import { LDTriggerz } from "./LDTriggerz.js";
 import { registerSceneControlHook } from "./hooks/UIHooks.js";
+import { errorLog, errorMessage } from "./Logger.js";
 
 let activeInstance = null;
 
@@ -17,18 +18,23 @@ export function initHook(env = globalThis) {
 }
 
 export function readyHook() {
+  if (!activeInstance) return false;
   return activeInstance.ready();
 }
 
 export function actorUpdateHook(actor, updateData, _options, userId, env = globalThis) {
   if (env.game.userId !== userId) return false;
-  activeInstance.processActorUpdate(actor, updateData);
+  activeInstance.processActorUpdate(actor, updateData).catch((error) => {
+    errorLog(env, errorMessage(error, `Failed to process actor update for "${actor?.name ?? actor?.id}".`), error);
+  });
   return true;
 }
 
 export function tokenUpdateHook(tokenDocument, updateData, _options, userId, env = globalThis) {
   if (env.game.userId !== userId) return false;
-  activeInstance.processTokenUpdate(tokenDocument, updateData);
+  activeInstance.processTokenUpdate(tokenDocument, updateData).catch((error) => {
+    errorLog(env, errorMessage(error, `Failed to process token update for "${tokenDocument?.name ?? tokenDocument?.id}".`), error);
+  });
   return true;
 }
 

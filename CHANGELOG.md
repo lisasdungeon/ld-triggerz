@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.4 - 2026-07-29
+
+- Fixed the "Run macro" trigger action: it was fully wired through the GM Hub UI but silently did nothing, since the trigger engine's macro runner was never connected. It now resolves and executes the target macro, and reports a clear error (console + GM notification) if the macro id doesn't resolve.
+- Fixed actor/token update processing so a failure is now surfaced (console + GM notification) instead of disappearing as a silent unhandled rejection.
+- Fixed a potential crash if the `ready` hook ever fired before `init`.
+- Fixed `npm run check`: the `syntax` and `validate` scripts pointed at files that didn't exist, so the pipeline failed immediately. Both scripts now exist and run for real.
+- Release zips no longer bundle the promotional PDFs (how-to guide, Patreon post, promo, Reddit post, voiceover script) — those are marketing collateral, not module content.
+- Added a real automated test suite (123 tests) covering the trigger engine, condition adapter, macro runner, debug logger, data manager, socket handler, and CSB effect-value normalization.
+
 ## 1.0.3 - 2026-06-22
 
 - Added a Configure Settings menu launcher for the LD Triggerz GM Hub.

@@ -1,6 +1,7 @@
 import { ConditionAdapter } from "./ConditionAdapter.js";
 import { DataManager } from "./DataManager.js";
 import { MODULE_ID, SETTING_MENU_KEYS } from "./constants.js";
+import { createMacroRunner } from "./MacroRunner.js";
 import { SocketHandler } from "./SocketHandler.js";
 import { TriggerEngine } from "./TriggerEngine.js";
 import { UIManager } from "./UIManager.js";
@@ -116,6 +117,7 @@ export class LDTriggerz {
     this.conditionAdapter = new ConditionAdapter({ config: env.CONFIG });
     this.triggerEngine = new TriggerEngine({
       adapter: this.conditionAdapter,
+      macroRunner: createMacroRunner(env),
       conditionResolver: (condition) => this.resolveCondition(condition)
     });
     this.uiManager = null;

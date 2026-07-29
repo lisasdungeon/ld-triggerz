@@ -1,13 +1,13 @@
 {
   "name": "ld-triggerz",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "System-agnostic trigger automation and condition control for Foundry VTT.",
   "main": "main.js",
   "type": "module",
   "scripts": {
     "syntax": "node tests/check-syntax.mjs",
     "validate": "node tests/validate.mjs",
-    "test": "node --test tests/",
+    "test": "node --test 'tests/**/*.test.mjs'",
     "test:coverage": "node --test --experimental-test-coverage --test-coverage-include=main.js --test-coverage-include=src/**/*.js --test-coverage-exclude=tests/**/*.js --test-coverage-lines=100 --test-coverage-branches=100 --test-coverage-functions=100",
     "check": "npm run syntax && npm run validate && npm test"
   },
@@ -19,6 +19,13 @@
     "triggers",
     "conditions",
     "ld"
+  ],
+  "author": "Lisa's Dungeon",
+  "contributors": [
+    {
+      "name": "Lisa's Dungeon",
+      "url": "https://github.com/lisasdungeon"
+    }
   ],
   "license": "Proprietary",
   "repository": {

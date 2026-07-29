@@ -30,7 +30,6 @@ zip -r "$ZIP_PATH" \
   styles \
   templates \
   lang \
-  ld-triggerz-*.pdf \
   -x "*/.*" \
   -x "*/tests/*" \
   -x "*/scripts/*" \
