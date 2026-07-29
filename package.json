@@ -7,7 +7,7 @@
   "scripts": {
     "syntax": "node tests/check-syntax.mjs",
     "validate": "node tests/validate.mjs",
-    "test": "node --test",
+    "test": "node --test tests/",
     "test:coverage": "node --test --experimental-test-coverage --test-coverage-include=main.js --test-coverage-include=src/**/*.js --test-coverage-exclude=tests/**/*.js --test-coverage-lines=100 --test-coverage-branches=100 --test-coverage-functions=100",
     "check": "npm run syntax && npm run validate && npm test"
   },
