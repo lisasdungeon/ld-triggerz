@@ -4,6 +4,8 @@
 
 - Compliance pass: sole author Lisa's Dungeon with Discord MystryssLysa / email Lisasdungeon@gmail.com / Patreon LisasDungeon.
 - Removed non-compliant declaration file and related README section.
+- Expanded automated tests to 100% line, branch, and function coverage across main.js and all src modules (GM Hub UI, item detail windows, UIManager, LDTriggerz orchestration, hooks).
+- Added jsdom as a devDependency for DOM-level UI event tests.
 
 
 ## 1.0.5 - 2026-07-29

@@ -31,5 +31,8 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/lisasdungeon/ld-triggerz.git"
+  },
+  "devDependencies": {
+    "jsdom": "^30.0.1"
   }
 }
