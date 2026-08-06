@@ -3,7 +3,7 @@
 ## Unreleased
 
 - Compliance pass: sole author Lisa's Dungeon with Discord MystryssLysa / email Lisasdungeon@gmail.com / Patreon LisasDungeon.
-- Removed generative AI declaration file and README section (no AI references in the codebase).
+- Removed non-compliant declaration file and related README section.
 
 
 ## 1.0.5 - 2026-07-29
