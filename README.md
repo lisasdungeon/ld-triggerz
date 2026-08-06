@@ -131,23 +131,14 @@ Your triggers and conditions are saved as Foundry world settings. To back them u
 
 - **GitHub**: https://github.com/lisasdungeon/ld-triggerz
 - **Patreon**: https://patreon.com/LisasDungeon
-- **Discord**: mystrysslysa_97536
+- **Discord**: MystryssLysa
+- **Email**: Lisasdungeon@gmail.com
 
 ---
 
 ## License
 
 Lisa's Dungeon Proprietary License. All rights reserved.
-
----
-
-## Generative AI Content Declaration
-
-This package contains **no generative AI content**. All user-facing prepared content — written text, visual media, audio media, software code, and marketing materials — was created by a human author without the use of generative AI tools.
-
-This package does not invoke AI generation at runtime and does not ship AI-generated assets or models.
-
-See `GENERATIVE_AI_CONTENT_DECLARATION.md` for the full declaration.
 
 ---
 

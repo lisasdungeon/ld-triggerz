@@ -48,7 +48,6 @@ function validateModule() {
     'LICENSE',
     'README.md',
     'CHANGELOG.md',
-    'GENERATIVE_AI_CONTENT_DECLARATION.md',
     'main.js',
     'src/LDTriggerz.js',
     'src/hooks.js',
@@ -82,7 +81,6 @@ function validateModule() {
     ...fs.readdirSync(projectRoot).filter((entry) => textExtensions.test(entry)).map((entry) => path.join(projectRoot, entry))
   ];
   for (const file of textFiles) {
-    if (path.basename(file) === 'GENERATIVE_AI_CONTENT_DECLARATION.md') continue;
     const content = fs.readFileSync(file, 'utf8');
     for (const pattern of FORBIDDEN_PATTERNS) {
       if (pattern.test(content)) {
