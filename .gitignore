@@ -5,3 +5,9 @@ coverage/
 *.log
 .pdf-venv/
 
+build-staging/
+.release-staging/
+.release-temp/
+.env
+.env.*
+!.env.example
