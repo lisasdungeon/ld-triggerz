@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Compliance pass: sole author Lisa's Dungeon with Discord MystryssLysa / email Lisasdungeon@gmail.com / Patreon LisasDungeon.
+- Removed generative AI declaration file and README section (no AI references in the codebase).
+
+
 ## 1.0.5 - 2026-07-29
 
 - Fixed the "Run macro" trigger action: it was fully wired through the GM Hub UI but silently did nothing, since the trigger engine's macro runner was never connected. It now resolves and executes the target macro, and reports a clear error (console + GM notification) if the macro id doesn't resolve.
