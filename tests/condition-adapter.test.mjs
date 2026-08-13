@@ -1,6 +1,16 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { ConditionAdapter, conditionAliases, effectDocuments, effectMatches, makeEffectData } from '../src/ConditionAdapter.js';
+import {
+  ConditionAdapter,
+  changesNeedSync,
+  conditionAliases,
+  conditionHasChanges,
+  effectDocuments,
+  effectMatches,
+  findConditionForEffect,
+  makeEffectData,
+  syncEffectWithCondition
+} from '../src/ConditionAdapter.js';
 import { ACTION_TYPES } from '../src/constants.js';
 
 test('conditionAliases: collects id, name, and status name/label, de-duplicated', () => {
@@ -91,6 +101,83 @@ test('ConditionAdapter.apply: uses toggleStatusEffect when the id is a real stat
   await adapter.apply(actor, { id: 'bloodied' });
   assert.equal(actor.calls.toggleStatusEffect.length, 1);
   assert.deepEqual(actor.calls.toggleStatusEffect[0], { id: 'bloodied', opts: { active: true, overlay: false } });
+});
+
+test('ConditionAdapter.apply: status-linked conditions with changes create an ActiveEffect instead of toggling', async () => {
+  const adapter = makeAdapter();
+  const actor = makeActor();
+  const condition = {
+    id: 'bloodied',
+    name: 'Bloodied',
+    changes: [{ key: 'system.props.ETO_check', mode: 2, value: '-0.1' }]
+  };
+  await adapter.apply(actor, condition);
+  assert.equal(actor.calls.toggleStatusEffect.length, 0);
+  assert.equal(actor.calls.createEmbeddedDocuments.length, 1);
+  const created = actor.calls.createEmbeddedDocuments[0].data[0];
+  assert.deepEqual(created.statuses, ['bloodied']);
+  assert.equal(created.changes[0].mode, 0);
+  assert.equal(created.changes[0].value, '${ current + (-0.1) }$');
+});
+
+test('ConditionAdapter.apply: syncs changes onto an existing matching status effect', async () => {
+  const adapter = makeAdapter();
+  const updates = [];
+  const effect = {
+    id: 'eff1',
+    statuses: ['bloodied'],
+    changes: [],
+    update: async (data) => {
+      updates.push(data);
+      return data;
+    }
+  };
+  const actor = makeActor({ effects: [effect] });
+  const condition = {
+    id: 'bloodied',
+    changes: [{ key: 'system.props.ETO_check', mode: 2, value: '-0.1' }]
+  };
+  const result = await adapter.apply(actor, condition);
+  assert.equal(actor.calls.createEmbeddedDocuments.length, 0);
+  assert.equal(updates.length, 1);
+  assert.equal(updates[0].changes[0].value, '${ current + (-0.1) }$');
+  assert.equal(result[0].changes[0].value, '${ current + (-0.1) }$');
+});
+
+test('ConditionAdapter.apply: returns existing effects when changes are already synced', async () => {
+  const adapter = makeAdapter();
+  const changes = [{ key: 'system.props.ETO_check', mode: 0, value: '${ current + (-0.1) }$' }];
+  const effect = {
+    id: 'eff1',
+    statuses: ['bloodied'],
+    changes,
+    update: async () => {
+      throw new Error('should not update');
+    }
+  };
+  const actor = makeActor({ effects: [effect] });
+  const result = await adapter.apply(actor, { id: 'bloodied', changes });
+  assert.deepEqual(result, [effect]);
+});
+
+test('conditionHasChanges / findConditionForEffect / sync helpers', async () => {
+  assert.equal(conditionHasChanges(null), false);
+  assert.equal(conditionHasChanges({ changes: [] }), false);
+  assert.equal(conditionHasChanges({ changes: [{ key: 'x', mode: 0, value: '1' }] }), true);
+  assert.equal(changesNeedSync({ changes: [] }, [{ key: 'x' }]), true);
+  assert.equal(changesNeedSync({ changes: [{ key: 'x' }] }, [{ key: 'x' }]), false);
+  assert.equal(changesNeedSync(null, []), false);
+  assert.equal(changesNeedSync({}, null), false);
+
+  const condition = { id: 'bloodied', changes: [{ key: 'system.props.x', mode: 5, value: '1' }] };
+  const effect = { statuses: ['bloodied'], changes: [], name: 'Bloodied' };
+  assert.equal(findConditionForEffect(effect, [condition], () => ({ id: 'bloodied' }))?.id, 'bloodied');
+  assert.equal(findConditionForEffect(effect, [{ id: 'other' }], () => undefined), null);
+  assert.equal(findConditionForEffect(effect), null);
+  assert.equal(findConditionForEffect(effect, [{ id: 'bloodied', changes: [] }, condition])?.id, 'bloodied');
+  assert.equal(await syncEffectWithCondition({ changes: [] }, { changes: [] }), null);
+  assert.equal(await syncEffectWithCondition(null, condition), null);
+  assert.equal(await syncEffectWithCondition({ changes: [{ key: 'x' }], update: undefined }, condition), null);
 });
 
 test('ConditionAdapter.apply: falls back to creating an ActiveEffect for a homebrew condition', async () => {

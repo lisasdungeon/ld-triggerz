@@ -1,4 +1,4 @@
-import { ConditionAdapter } from "./ConditionAdapter.js";
+import { ConditionAdapter, syncEffectWithCondition } from "./ConditionAdapter.js";
 import { DataManager } from "./DataManager.js";
 import { MODULE_ID, SETTING_MENU_KEYS } from "./constants.js";
 import { createMacroRunner } from "./MacroRunner.js";
@@ -166,6 +166,12 @@ export class LDTriggerz {
   async processTokenUpdate(tokenDocument, updateData) {
     const actor = tokenDocument?.actor ?? tokenDocument;
     return this.triggerEngine.processUpdate(tokenActorEntity(tokenDocument, updateData), tokenActorUpdateData(updateData), this.dataManager.getTriggers(), actor, this.dataManager.getConditions());
+  }
+
+  async processActiveEffectCreate(effect) {
+    const condition = this.conditionAdapter.findConditionForEffect(effect, this.dataManager.getConditions());
+    if (!condition) return null;
+    return syncEffectWithCondition(effect, condition);
   }
 
   exportData() {

@@ -438,13 +438,16 @@ test("hooks: rejection catch arrows via registered callbacks; getActiveInstance"
   assert.ok(getActiveInstance());
   getActiveInstance().processActorUpdate = () => Promise.reject(new Error("actor-fail"));
   getActiveInstance().processTokenUpdate = () => Promise.reject(new Error("token-fail"));
+  getActiveInstance().processActiveEffectCreate = () => Promise.reject(new Error("effect-fail"));
   hooksOn.find((h) => h.n === "updateActor").f({ name: "A" }, {}, {}, "u");
   hooksOn.find((h) => h.n === "updateToken").f({ name: "T" }, {}, {}, "u");
+  hooksOn.find((h) => h.n === "createActiveEffect").f({ name: "E" }, {}, "u");
   await new Promise((r) => setTimeout(r, 0));
-  assert.ok(errors.length >= 2);
+  assert.ok(errors.length >= 3);
   // mismatch userId via registered callback
   assert.equal(hooksOn.find((h) => h.n === "updateActor").f({}, {}, {}, "other"), false);
   assert.equal(hooksOn.find((h) => h.n === "updateToken").f({}, {}, {}, "other"), false);
+  assert.equal(hooksOn.find((h) => h.n === "createActiveEffect").f({}, {}, "other"), false);
 });
 
 test("GMHubActions selectedActors empty canvas", () => {

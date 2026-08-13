@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.7 - 2026-08-13
+
+- Fixed status-linked conditions so Advanced Effect Changes are applied instead of being dropped by `toggleStatusEffect`.
+- Syncing saved condition ActiveEffect changes when a matching Foundry/CSB status is applied from the token HUD or elsewhere.
+- CSB `system.props.*` add/multiply/override values continue to normalize into custom formulas on apply and sync.
+
 ## 1.0.6
 
 - Compliance and hardening release: sole Lisa's Dungeon authorship and contact fields (Discord MystryssLysa, email Lisasdungeon@gmail.com, Patreon LisasDungeon); lazy loading / trigger-based startup where needed; 500 LOC file cap; full source line coverage; no emoji or AI references in the shipped package.

@@ -56,6 +56,38 @@ export function makeEffectData(condition, status, options = {}) {
   };
 }
 
+export function conditionHasChanges(condition) {
+  return normalizeEffectChanges(condition?.changes).length > 0;
+}
+
+export function findConditionForEffect(effect, conditions = [], getStatus = () => undefined) {
+  for (const condition of asArray(conditions)) {
+    if (!conditionHasChanges(condition)) continue;
+    if (effectMatches(effect, condition, getStatus(conditionId(condition)))) return condition;
+  }
+  return null;
+}
+
+export function changesNeedSync(effect, changes) {
+  return JSON.stringify(effect?.changes ?? []) !== JSON.stringify(changes ?? []);
+}
+
+export async function syncEffectWithCondition(effect, condition) {
+  const changes = normalizeEffectChanges(condition?.changes);
+  if (!changes.length || !changesNeedSync(effect, changes)) return null;
+  if (typeof effect?.update !== "function") return null;
+  const id = conditionId(condition);
+  return effect.update({
+    changes,
+    flags: {
+      [MODULE_ID]: {
+        conditionId: id,
+        source: "condition-adapter"
+      }
+    }
+  });
+}
+
 export class ConditionAdapter {
   constructor({ config = globalThis.CONFIG } = {}) {
     this.config = config;
@@ -71,6 +103,10 @@ export class ConditionAdapter {
 
   hasEffect(actor, condition) {
     return effectDocuments(actor?.effects).some((effect) => effectMatches(effect, condition, this.getStatus(conditionId(condition))));
+  }
+
+  findConditionForEffect(effect, conditions = []) {
+    return findConditionForEffect(effect, conditions, (id) => this.getStatus(id));
   }
 
   assignedConditionIds(target) {
@@ -115,6 +151,25 @@ export class ConditionAdapter {
     const id = conditionId(condition);
     const status = this.getStatus(id);
     if (!actor) throw makeError("No actor available for condition apply.", { id });
+
+    // Status toggle alone drops ActiveEffect changes. When the condition defines
+    // changes, create/sync a full effect so CSB/system props actually update.
+    if (conditionHasChanges(condition)) {
+      const matching = effectDocuments(actor.effects).filter((effect) => effectMatches(effect, condition, status));
+      if (matching.length) {
+        const synced = [];
+        for (const effect of matching) {
+          const result = await syncEffectWithCondition(effect, condition);
+          if (result !== null) synced.push(result);
+        }
+        return synced.length ? synced : matching;
+      }
+      if (typeof actor.createEmbeddedDocuments !== "function") {
+        throw makeError("Actor cannot create ActiveEffect documents.", { id });
+      }
+      return actor.createEmbeddedDocuments("ActiveEffect", [makeEffectData(condition, status, options)]);
+    }
+
     if (status && typeof actor.toggleStatusEffect === "function") {
       return actor.toggleStatusEffect(id, { active: true, overlay: Boolean(options.overlay) });
     }

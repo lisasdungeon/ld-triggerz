@@ -38,12 +38,22 @@ export function tokenUpdateHook(tokenDocument, updateData, _options, userId, env
   return true;
 }
 
+export function activeEffectCreateHook(effect, _options, userId, env = globalThis) {
+  if (!activeInstance) return false;
+  if (env.game.userId !== userId) return false;
+  activeInstance.processActiveEffectCreate(effect).catch((error) => {
+    errorLog(env, errorMessage(error, `Failed to sync condition changes for effect "${effect?.name ?? effect?.id}".`), error);
+  });
+  return true;
+}
+
 export function registerHooks(env = globalThis) {
   if (!env.Hooks) return false;
   env.Hooks.once("init", () => initHook(env));
   env.Hooks.once("ready", () => readyHook());
   env.Hooks.on("updateActor", (actor, updateData, options, userId) => actorUpdateHook(actor, updateData, options, userId, env));
   env.Hooks.on("updateToken", (tokenDocument, updateData, options, userId) => tokenUpdateHook(tokenDocument, updateData, options, userId, env));
+  env.Hooks.on("createActiveEffect", (effect, options, userId) => activeEffectCreateHook(effect, options, userId, env));
   registerSceneControlHook(env, () => activeInstance);
   return true;
 }

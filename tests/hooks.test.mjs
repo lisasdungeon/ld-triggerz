@@ -3,7 +3,16 @@
 // the readyHook() null guard for out-of-order hook firing.
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { actorUpdateHook, getActiveInstance, initHook, readyHook, registerHooks, resetHooksForTests, tokenUpdateHook } from '../src/hooks.js';
+import {
+  activeEffectCreateHook,
+  actorUpdateHook,
+  getActiveInstance,
+  initHook,
+  readyHook,
+  registerHooks,
+  resetHooksForTests,
+  tokenUpdateHook
+} from '../src/hooks.js';
 
 class ApplicationV2 {}
 function HandlebarsApplicationMixin(Base) {
@@ -61,7 +70,7 @@ test('initHook: constructs and returns the active instance; readyHook then deleg
   assert.equal(readyHook(), instance);
 });
 
-test('registerHooks: wires init/ready once, updateActor/updateToken/getSceneControlButtons on', () => {
+test('registerHooks: wires init/ready once, updateActor/updateToken/createActiveEffect/getSceneControlButtons on', () => {
   resetHooksForTests();
   const env = makeEnv();
   assert.equal(registerHooks(env), true);
@@ -69,6 +78,7 @@ test('registerHooks: wires init/ready once, updateActor/updateToken/getSceneCont
   const onNames = env.hooksOn.map((h) => h.name);
   assert.ok(onNames.includes('updateActor'));
   assert.ok(onNames.includes('updateToken'));
+  assert.ok(onNames.includes('createActiveEffect'));
   assert.ok(onNames.includes('getSceneControlButtons'));
 });
 
@@ -123,4 +133,33 @@ test('tokenUpdateHook: a rejected processTokenUpdate is caught and logged, not t
   await new Promise((resolve) => setTimeout(resolve, 0));
   assert.equal(env.consoleErrors.length, 1);
   assert.match(env.consoleErrors[0][0], /boom/);
+});
+
+test('activeEffectCreateHook: ignores foreign users and missing instance', () => {
+  resetHooksForTests();
+  const env = makeEnv();
+  assert.equal(activeEffectCreateHook({ id: 'e1' }, {}, env.game.userId, env), false);
+  initHook(env);
+  assert.equal(activeEffectCreateHook({ id: 'e1' }, {}, 'someone-else', env), false);
+});
+
+test('activeEffectCreateHook: a rejected sync is caught and logged', async () => {
+  resetHooksForTests();
+  const env = makeEnv();
+  const instance = initHook(env);
+  instance.processActiveEffectCreate = () => Promise.reject(new Error('sync-fail'));
+  assert.equal(activeEffectCreateHook({ id: 'e1', name: 'Étourdis' }, {}, env.game.userId, env), true);
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.equal(env.consoleErrors.length, 1);
+  assert.match(env.consoleErrors[0][0], /sync-fail/);
+});
+
+test('activeEffectCreateHook: empty error falls back using effect id when name is missing', async () => {
+  resetHooksForTests();
+  const env = makeEnv();
+  const instance = initHook(env);
+  instance.processActiveEffectCreate = () => Promise.reject(new Error(''));
+  assert.equal(activeEffectCreateHook({ id: 'eff-42' }, {}, env.game.userId, env), true);
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.match(env.consoleErrors[0][0], /eff-42/);
 });

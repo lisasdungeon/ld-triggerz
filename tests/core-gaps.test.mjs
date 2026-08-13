@@ -207,11 +207,14 @@ test("registerHooks: registered callbacks invoke init/ready/actor/token handlers
   const instance = initHook(env);
   instance.processActorUpdate = async () => true;
   instance.processTokenUpdate = async () => true;
+  instance.processActiveEffectCreate = async () => true;
 
   const actorHook = hooksOn.find((h) => h.name === "updateActor");
   const tokenHook = hooksOn.find((h) => h.name === "updateToken");
+  const effectHook = hooksOn.find((h) => h.name === "createActiveEffect");
   assert.equal(actorHook.fn({ id: "a1" }, {}, {}, env.game.userId), true);
   assert.equal(tokenHook.fn({ id: "t1" }, {}, {}, env.game.userId), true);
+  assert.equal(effectHook.fn({ id: "e1" }, {}, env.game.userId), true);
   await new Promise((r) => setTimeout(r, 0));
 });
 

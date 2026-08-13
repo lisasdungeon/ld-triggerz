@@ -104,6 +104,29 @@ test("apply: honors overlay option on toggleStatusEffect", async () => {
   assert.deepEqual(calls[0], { id: "bloodied", opts: { active: true, overlay: true } });
 });
 
+test("apply: throws when a changed condition cannot create an ActiveEffect", async () => {
+  const adapter = new ConditionAdapter({ config: { statusEffects: [{ id: "bloodied" }] } });
+  const actor = {
+    effects: [],
+    toggleStatusEffect: async () => true
+  };
+  await assert.rejects(
+    () => adapter.apply(actor, {
+      id: "bloodied",
+      changes: [{ key: "system.props.ETO_check", mode: 2, value: "-0.1" }]
+    }),
+    /cannot create ActiveEffect/
+  );
+});
+
+test("findConditionForEffect: uses adapter status lookup", () => {
+  const adapter = new ConditionAdapter({ config: { statusEffects: [{ id: "bloodied", name: "Bloodied" }] } });
+  const condition = { id: "bloodied", changes: [{ key: "system.props.x", mode: 5, value: "1" }] };
+  const effect = { statuses: ["bloodied"], changes: [] };
+  assert.equal(adapter.findConditionForEffect(effect, [condition])?.id, "bloodied");
+  assert.equal(adapter.findConditionForEffect(effect, []), null);
+});
+
 test("toActor: unwraps token-shaped targets", () => {
   const adapter = new ConditionAdapter({ config: { statusEffects: [] } });
   const actor = { id: "a1" };

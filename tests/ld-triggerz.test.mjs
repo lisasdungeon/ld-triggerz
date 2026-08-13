@@ -140,6 +140,33 @@ test("LDTriggerz.processActorUpdate / processTokenUpdate / import export", async
   assert.equal(tz.exportData().triggers.length, 1);
 });
 
+test("LDTriggerz.processActiveEffectCreate: syncs saved condition changes onto matching status effects", async () => {
+  const env = makeEnv();
+  env.CONFIG.statusEffects = [{ id: "stunned", name: "Étourdis" }];
+  const tz = new LDTriggerz({ env }).init();
+  env.game.settings.set("ld-triggerz", "conditions", [{
+    id: "stunned",
+    name: "Étourdis",
+    changes: [{ key: "system.props.ETO_check", mode: 2, value: "-0.1" }]
+  }]);
+
+  assert.equal(await tz.processActiveEffectCreate({ statuses: ["other"], changes: [] }), null);
+
+  const updates = [];
+  const effect = {
+    id: "e1",
+    statuses: ["stunned"],
+    changes: [],
+    update: async (data) => {
+      updates.push(data);
+      return data;
+    }
+  };
+  await tz.processActiveEffectCreate(effect);
+  assert.equal(updates.length, 1);
+  assert.equal(updates[0].changes[0].value, "${ current + (-0.1) }$");
+});
+
 test("mergePathData deep-merge branches via actorUpdateEntity", () => {
   const actor = {
     system: { nested: { a: 1, b: 2 } },
