@@ -55,15 +55,36 @@ test('csbValueExpression: passes plain numeric text through unchanged', () => {
   assert.equal(csbValueExpression('-2.5'), '-2.5');
 });
 
+test('csbValueExpression: bare prop math expressions pass through', () => {
+  assert.equal(csbValueExpression('ATK_calc * 0.08'), 'ATK_calc * 0.08');
+  assert.equal(csbValueExpression('ATK_calc'), 'ATK_calc');
+  assert.equal(csbValueExpression('(ATK_calc * 0.08)'), '(ATK_calc * 0.08)');
+  assert.equal(csbValueExpression('ATK_calc - 1'), 'ATK_calc - 1');
+});
+
 test('csbValueExpression: non-numeric, non-prop, non-formula text resolves to empty', () => {
   assert.equal(csbValueExpression('not-numeric'), '');
   assert.equal(csbValueExpression(''), '');
+  assert.equal(csbValueExpression('hello world'), '');
+  assert.equal(csbValueExpression('ATK_calc & 0.08'), '');
 });
 
 test('normalizeEffectChange: ADD onto a CSB prop becomes CUSTOM math using the component key', () => {
   const result = normalizeEffectChange({ key: 'system.props.ETO_check', mode: 2, value: '-0.1' });
   assert.equal(result.mode, 0);
   assert.equal(result.value, '${ ETO_check + (-0.1) }$');
+});
+
+test('normalizeEffectChange: ADD accepts bare prop math without ${ }$ wrappers', () => {
+  const result = normalizeEffectChange({ key: 'system.props.DEF', mode: 2, value: 'ATK_calc * 0.08' });
+  assert.equal(result.mode, 0);
+  assert.equal(result.value, '${ DEF + (ATK_calc * 0.08) }$');
+});
+
+test('normalizeEffectChange: ADD accepts wrapped prop math formulas', () => {
+  const result = normalizeEffectChange({ key: 'system.props.DEF', mode: 2, value: '${ ATK_calc * 0.08 }$' });
+  assert.equal(result.mode, 0);
+  assert.equal(result.value, '${ DEF + (ATK_calc * 0.08) }$');
 });
 
 test('normalizeEffectChange: MULTIPLY onto a CSB prop becomes CUSTOM math using the component key', () => {

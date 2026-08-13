@@ -59,7 +59,7 @@ test("DataManager filter callbacks run on non-empty collections", async () => {
   dm.registerSettings();
   await dm.upsertTrigger({ id: "t1", path: "x" });
   await dm.upsertTrigger({ id: "t2", path: "y" });
-  // replace existing id — filter callback must run over current items
+  // replace existing id - filter callback must run over current items
   await dm.upsertTrigger({ id: "t1", path: "x2" });
   assert.equal(dm.getTriggers().length, 2);
   await dm.deleteTrigger("t2");

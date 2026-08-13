@@ -85,7 +85,7 @@ test("ConditionAdapter branches: string condition names and transfer default", a
   };
   const created = await adapter.apply(actor, "stunned");
   // status exists so toggle would be used if present; without it falls through
-  // status is found so toggleStatusEffect path preferred — recreate without status for string name path
+  // status is found so toggleStatusEffect path preferred - recreate without status for string name path
   const adapter2 = new ConditionAdapter({ config: { statusEffects: [] } });
   const created2 = await adapter2.apply(actor, "homebrew");
   assert.equal(created2[0].name, "homebrew");

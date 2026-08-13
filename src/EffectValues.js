@@ -48,7 +48,17 @@ export function csbValueExpression(value) {
   if (formula) return formula;
   if (isCSBPropPath(text)) return csbPathExpression(text);
   if (NUMERIC_TEXT.test(text)) return text;
+  // Bare CSB/math expressions typed in the Value field, e.g. ATK_calc * 0.08
+  if (isBareCSBExpression(text)) return text;
   return "";
+}
+
+function isBareCSBExpression(text) {
+  if (/^[A-Za-z_][A-Za-z0-9_]*$/.test(text)) return true;
+  // Hyphenated words like "not-numeric" are not math expressions.
+  if (/[A-Za-z]-[A-Za-z]/.test(text)) return false;
+  if (!/^[A-Za-z0-9_\s.+\-*/%(),]+$/.test(text)) return false;
+  return /[+\-*/%()]/.test(text);
 }
 
 export function makeCSBFormula(expression) {
@@ -104,7 +114,7 @@ export function normalizeEffectChange(change) {
     const mode = legacy?.mode ?? normalized.mode;
     const value = legacy?.value ?? normalized.value;
     const propKey = csbPathExpression(normalized.key);
-    const expression = csbValueExpression(value) || (NUMERIC_TEXT.test(value) ? value : "");
+    const expression = csbValueExpression(value);
 
     if (mode === ACTIVE_EFFECT_MODE.ADD && expression && propKey) {
       return { ...normalized, mode: ACTIVE_EFFECT_MODE.CUSTOM, value: makeCSBFormula(`${propKey} + (${expression})`) };

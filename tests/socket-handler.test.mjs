@@ -1,5 +1,5 @@
 // Slice C: socket-sync functional tests for ld-triggerz.
-// Targets SocketHandler — register(), emit(), and receive(payload). The
+// Targets SocketHandler - register(), emit(), and receive(payload). The
 // constructor takes a fully-injected game/dataManager/uiManager triple so
 // every method is testable with plain mock objects.
 import assert from 'node:assert/strict';
@@ -85,7 +85,7 @@ test('SocketHandler.receive: unknown events return false without touching UI', a
 test('SocketHandler.receive: the registered socket.on callback is bound to the same receive() function', async () => {
   const { handler, socketHandlers, renderCalls } = makeHarness();
   handler.register();
-  // Simulate an inbound payload from the GM's socket — the harness is the
+  // Simulate an inbound payload from the GM's socket - the harness is the
   // same client, so calling the registered fn is equivalent to Foundry
   // invoking the listener.
   await socketHandlers[0].fn({ event: SOCKET_EVENTS.REFRESH_HUB, data: null });

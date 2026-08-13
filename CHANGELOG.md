@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.10 - 2026-08-13
+
+- CSB Add/Multiply values now accept bare expressions like `ATK_calc * 0.08` (not only `${ ... }$` wrappers) and normalize them to component-key Custom formulas.
+- Added `docs/CSB-Effect-Changes.md` with CSB ActiveEffect how-to notes, including that the modified prop must be a keyed Label (Number fields are not updated by CSB ActiveEffects).
+- Removed the voiceover script PDF and its generator from the repository.
+- Replaced em/en dashes in changelog and docs with plain ASCII hyphens.
+
 ## 1.0.9 - 2026-08-13
 
 - Fixed CSB string concatenation on Add (`"1" + "-0.1"` becoming `"1-0.1"`): `system.props.*` Add/Multiply now normalize to Custom formulas using the component key, e.g. `${ ETO_check + (-0.1) }$`, so CSB/mathjs performs real numeric math.

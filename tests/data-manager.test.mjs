@@ -32,7 +32,7 @@ test('registerSettings: registers every entry in SETTING_DEFINITIONS exactly onc
   assert.equal(game.registered.length, SETTING_DEFINITIONS.length);
 });
 
-test('registerSettings: is idempotent — a second call skips already-registered keys', () => {
+test('registerSettings: is idempotent - a second call skips already-registered keys', () => {
   const game = makeGame();
   const dm = new DataManager({ game });
   dm.registerSettings();

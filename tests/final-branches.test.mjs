@@ -223,7 +223,7 @@ test("browseIcon: FP not a function returns after input exists; named trigger wi
     <button data-action="browse-icon" type="button"></button>
   `;
   document.body.appendChild(element);
-  // No FilePicker on env or global — hits typeof FP !== "function" return
+  // No FilePicker on env or global - hits typeof FP !== "function" return
   delete globalThis.FilePicker;
   bindGMHubEvents({
     element,
