@@ -237,33 +237,10 @@ def reddit_post():
     )
 
 
-def voiceover_script():
-    title = "LD Triggerz<br/>Voice Over Script"
-    elements = [
-        "approx. 2 minutes - v1.0.3",
-        "If you're running games in Foundry, you already know the drill. Someone's HP drops. You stop everything, scroll to their sheet, manually flip on the Bloodied condition, and hope you didn't just kill the pacing of the scene. LD Triggerz fixes that.",
-        "[ beat ]",
-        "It's a system-agnostic automation module for Foundry VTT. You set the rules once, and from that point on the table handles itself. HP drops below half - Bloodied goes on automatically. HP hits zero - Unconscious fires. Stat recovers - the condition lifts on its own. You don't touch a thing.",
-        "[ beat ]",
-        "The whole thing runs through the GM Hub. One window inside Foundry where you build your triggers, build your conditions, and wire them together. Pick the data path you want to watch. Set the operator. Set the value. Choose what happens when it fires. Save it. Done. You can compare against raw numbers, against other actor paths, or against a percentage of a stat's max. You can scope rules to PCs only, NPCs only, or everyone. You can link a condition directly to an apply trigger and a remove trigger so the full cycle runs without a second rule.",
-        "[ beat ]",
-        "Custom System Builder users - your system.props paths are handled natively. The math normalizes automatically. You don't write formulas by hand. And when you've built a setup you like, export the whole thing as JSON. Share it, back it up, drop it into another world. One click to import and you're back up and running.",
-        "[ beat ]",
-        "LD Triggerz works on Foundry v13 and v14. Any system. No dependencies. No configuration beyond what you actually need. It's available right now from Lisa's Dungeon. Link is in the description. Come check it out.",
-    ]
-    build_pdf(
-        "ld-triggerz-voiceover-script.pdf",
-        title,
-        elements,
-        "Lisa's Dungeon - https://patreon.com/LisasDungeon",
-    )
-
-
 if __name__ == "__main__":
     PDFS.mkdir(parents=True, exist_ok=True)
     how_to_guide()
     patreon_post()
     promo()
     reddit_post()
-    voiceover_script()
     print("All PDFs generated.")
