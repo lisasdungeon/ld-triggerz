@@ -164,8 +164,8 @@ test("LDTriggerz.processActiveEffectCreate: syncs saved condition changes onto m
   };
   await tz.processActiveEffectCreate(effect);
   assert.equal(updates.length, 1);
-  assert.equal(updates[0].changes[0].mode, 2);
-  assert.equal(updates[0].changes[0].value, "-0.1");
+  assert.equal(updates[0].changes[0].mode, 0);
+  assert.equal(updates[0].changes[0].value, "${ ETO_check + (-0.1) }$");
 });
 
 test("mergePathData deep-merge branches via actorUpdateEntity", () => {

@@ -39,7 +39,7 @@ test('csbPathExpression: strips the system.props./props. prefix', () => {
 });
 
 test('makeCSBFormula: wraps an expression in the ${ }$ marker', () => {
-  assert.equal(makeCSBFormula('current + (1)'), '${ current + (1) }$');
+  assert.equal(makeCSBFormula('ETO_check + (-0.1)'), '${ ETO_check + (-0.1) }$');
 });
 
 test('csbValueExpression: unwraps an existing formula first', () => {
@@ -60,81 +60,99 @@ test('csbValueExpression: non-numeric, non-prop, non-formula text resolves to em
   assert.equal(csbValueExpression(''), '');
 });
 
-test('normalizeEffectChange: ADD onto a CSB prop path keeps native ADD with a plain value', () => {
+test('normalizeEffectChange: ADD onto a CSB prop becomes CUSTOM math using the component key', () => {
   const result = normalizeEffectChange({ key: 'system.props.ETO_check', mode: 2, value: '-0.1' });
-  assert.equal(result.mode, 2);
-  assert.equal(result.value, '-0.1');
+  assert.equal(result.mode, 0);
+  assert.equal(result.value, '${ ETO_check + (-0.1) }$');
 });
 
-test('normalizeEffectChange: MULTIPLY onto a CSB prop path keeps native MULTIPLY', () => {
+test('normalizeEffectChange: MULTIPLY onto a CSB prop becomes CUSTOM math using the component key', () => {
   const result = normalizeEffectChange({ key: 'props.bloodCharge', mode: 1, value: '2' });
-  assert.equal(result.mode, 1);
-  assert.equal(result.value, '2');
+  assert.equal(result.mode, 0);
+  assert.equal(result.value, '${ bloodCharge * (2) }$');
 });
 
-test('normalizeEffectChange: OVERRIDE onto a CSB prop path keeps native OVERRIDE', () => {
+test('normalizeEffectChange: OVERRIDE onto a CSB prop keeps native OVERRIDE', () => {
   const result = normalizeEffectChange({ key: 'props.bloodCharge', mode: 5, value: '7' });
   assert.equal(result.mode, 5);
   assert.equal(result.value, '7');
 });
 
-test('normalizeEffectChange: restores legacy CUSTOM current+() formulas back to ADD', () => {
+test('normalizeEffectChange: restores legacy current+() then converts to prop-key CUSTOM math', () => {
   const result = normalizeEffectChange({
     key: 'system.props.ETO_check',
     mode: 0,
     value: '${ current + (-0.1) }$'
   });
-  assert.equal(result.mode, 2);
-  assert.equal(result.value, '-0.1');
-});
-
-test('normalizeEffectChange: empty legacy current+() capture stays CUSTOM', () => {
-  const result = normalizeEffectChange({
-    key: 'system.props.ETO_check',
-    mode: 0,
-    value: '${ current + (   ) }$'
-  });
   assert.equal(result.mode, 0);
-  assert.equal(result.value, '${ current + (   ) }$');
+  assert.equal(result.value, '${ ETO_check + (-0.1) }$');
 });
 
-test('normalizeEffectChange: empty legacy current*() capture stays CUSTOM', () => {
-  const result = normalizeEffectChange({
-    key: 'props.bloodCharge',
-    mode: 0,
-    value: '${ current * (  ) }$'
-  });
-  assert.equal(result.mode, 0);
-});
-
-test('normalizeEffectChange: CUSTOM without formula wrappers is not restored', () => {
-  const result = normalizeEffectChange({
-    key: 'system.props.ETO_check',
-    mode: 0,
-    value: 'current + (1)'
-  });
-  assert.equal(result.mode, 0);
-  assert.equal(result.value, 'current + (1)');
-});
-
-test('normalizeEffectChange: non-CSB CUSTOM keys are not restored as legacy math', () => {
-  const result = normalizeEffectChange({
-    key: 'system.hp.value',
-    mode: 0,
-    value: '${ current + (1) }$'
-  });
-  assert.equal(result.mode, 0);
-  assert.equal(result.value, '${ current + (1) }$');
-});
-
-test('normalizeEffectChange: restores legacy CUSTOM current*() formulas back to MULTIPLY', () => {
+test('normalizeEffectChange: restores legacy current*() then converts to prop-key CUSTOM math', () => {
   const result = normalizeEffectChange({
     key: 'props.bloodCharge',
     mode: 0,
     value: '${ current * (2) }$'
   });
-  assert.equal(result.mode, 1);
-  assert.equal(result.value, '2');
+  assert.equal(result.mode, 0);
+  assert.equal(result.value, '${ bloodCharge * (2) }$');
+});
+
+test('normalizeEffectChange: re-normalizing prop-key CUSTOM math stays stable', () => {
+  const once = normalizeEffectChange({ key: 'system.props.ETO_check', mode: 2, value: '-0.1' });
+  const twice = normalizeEffectChange(once);
+  assert.deepEqual(twice, once);
+
+  const mulOnce = normalizeEffectChange({ key: 'props.bloodCharge', mode: 1, value: '2' });
+  const mulTwice = normalizeEffectChange(mulOnce);
+  assert.deepEqual(mulTwice, mulOnce);
+});
+
+test('normalizeEffectChange: empty prop-key multiply capture stays CUSTOM', () => {
+  const result = normalizeEffectChange({
+    key: 'props.bloodCharge',
+    mode: 0,
+    value: '${ bloodCharge * (   ) }$'
+  });
+  assert.equal(result.mode, 0);
+  assert.equal(result.value, '${ bloodCharge * (   ) }$');
+});
+
+test('normalizeEffectChange: empty prop-key add capture stays CUSTOM', () => {
+  const result = normalizeEffectChange({
+    key: 'system.props.ETO_check',
+    mode: 0,
+    value: '${ ETO_check + (   ) }$'
+  });
+  assert.equal(result.mode, 0);
+});
+
+test('normalizeEffectChange: CUSTOM add/multiply formulas for a different prop key stay as-is', () => {
+  const add = normalizeEffectChange({
+    key: 'system.props.ETO_check',
+    mode: 0,
+    value: '${ otherKey + (1) }$'
+  });
+  assert.equal(add.mode, 0);
+  assert.equal(add.value, '${ otherKey + (1) }$');
+
+  const mul = normalizeEffectChange({
+    key: 'props.bloodCharge',
+    mode: 0,
+    value: '${ otherKey * (2) }$'
+  });
+  assert.equal(mul.mode, 0);
+  assert.equal(mul.value, '${ otherKey * (2) }$');
+});
+
+test('normalizeEffectChange: non-numeric ADD values on CSB keys are left as native ADD', () => {
+  const result = normalizeEffectChange({
+    key: 'system.props.ETO_check',
+    mode: 2,
+    value: 'not-a-number'
+  });
+  assert.equal(result.mode, 2);
+  assert.equal(result.value, 'not-a-number');
 });
 
 test('normalizeEffectChange: restores legacy CUSTOM numeric formulas back to OVERRIDE', () => {
@@ -179,6 +197,25 @@ test('normalizeEffectChange: missing mode defaults to CUSTOM (0)', () => {
   assert.equal(result.mode, 0);
 });
 
+test('normalizeEffectChange: empty legacy current+() capture stays CUSTOM', () => {
+  const result = normalizeEffectChange({
+    key: 'system.props.ETO_check',
+    mode: 0,
+    value: '${ current + (   ) }$'
+  });
+  assert.equal(result.mode, 0);
+  assert.equal(result.value, '${ current + (   ) }$');
+});
+
+test('normalizeEffectChange: empty legacy current*() capture stays CUSTOM', () => {
+  const result = normalizeEffectChange({
+    key: 'props.bloodCharge',
+    mode: 0,
+    value: '${ current * (  ) }$'
+  });
+  assert.equal(result.mode, 0);
+});
+
 test('normalizeEffectChanges: maps every change, and non-arrays become an empty array', () => {
   const changes = [
     { key: 'props.bloodCharge', mode: 2, value: '3' },
@@ -186,8 +223,8 @@ test('normalizeEffectChanges: maps every change, and non-arrays become an empty 
   ];
   const result = normalizeEffectChanges(changes);
   assert.equal(result.length, 2);
-  assert.equal(result[0].mode, 2);
-  assert.equal(result[0].value, '3');
+  assert.equal(result[0].mode, 0);
+  assert.equal(result[0].value, '${ bloodCharge + (3) }$');
   assert.deepEqual(normalizeEffectChanges(null), []);
   assert.deepEqual(normalizeEffectChanges(undefined), []);
 });

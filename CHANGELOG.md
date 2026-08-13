@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.9 - 2026-08-13
+
+- Fixed CSB string concatenation on Add (`"1" + "-0.1"` becoming `"1-0.1"`): `system.props.*` Add/Multiply now normalize to Custom formulas using the component key, e.g. `${ ETO_check + (-0.1) }$`, so CSB/mathjs performs real numeric math.
+
 ## 1.0.8 - 2026-08-13
 
 - Fixed CSB 6 ActiveEffect math: keep native Add/Multiply/Override for `system.props.*` instead of converting them to Custom `current` formulas that CSB drops during `computeEffectChanges`.
