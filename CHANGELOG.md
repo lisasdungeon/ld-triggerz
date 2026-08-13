@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.11 - 2026-08-13
+
+- Fixed CSB Add/Multiply buffs that only applied the bonus (for example DEF became `ATK_calc * 0.08` instead of base DEF plus that bonus). Formulas now use CSB's `current` token, and LD Triggerz preserves `current` formulas through CSB precompute so apply-time math uses the live prop value.
+- Existing saved `${ DEF + (...) }$` style changes migrate to `${ current + (...) }$` on save/apply.
+- Updated `docs/CSB-Effect-Changes.md` for the `current` token.
+
 ## 1.0.10 - 2026-08-13
 
 - CSB Add/Multiply values now accept bare expressions like `ATK_calc * 0.08` (not only `${ ... }$` wrappers) and normalize them to component-key Custom formulas.

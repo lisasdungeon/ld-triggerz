@@ -108,19 +108,19 @@ export function normalizeEffectChange(change) {
 
   // Foundry ADD concatenates when CSB props are strings ("1" + "-0.1" => "1-0.1").
   // CSB Custom formulas are evaluated with mathjs, which does real numeric math.
-  // Use the component key (not `current`) so computeEffectChanges can resolve it.
+  // Use CSB's `current` token (the live prop value at apply time), not the component
+  // key - during CSB precompute the key is often still 0/reset.
   if (isCSBEffectKey(normalized.key)) {
     const legacy = extractLegacyDelta(normalized);
     const mode = legacy?.mode ?? normalized.mode;
     const value = legacy?.value ?? normalized.value;
-    const propKey = csbPathExpression(normalized.key);
     const expression = csbValueExpression(value);
 
-    if (mode === ACTIVE_EFFECT_MODE.ADD && expression && propKey) {
-      return { ...normalized, mode: ACTIVE_EFFECT_MODE.CUSTOM, value: makeCSBFormula(`${propKey} + (${expression})`) };
+    if (mode === ACTIVE_EFFECT_MODE.ADD && expression) {
+      return { ...normalized, mode: ACTIVE_EFFECT_MODE.CUSTOM, value: makeCSBFormula(`current + (${expression})`) };
     }
-    if (mode === ACTIVE_EFFECT_MODE.MULTIPLY && expression && propKey) {
-      return { ...normalized, mode: ACTIVE_EFFECT_MODE.CUSTOM, value: makeCSBFormula(`${propKey} * (${expression})`) };
+    if (mode === ACTIVE_EFFECT_MODE.MULTIPLY && expression) {
+      return { ...normalized, mode: ACTIVE_EFFECT_MODE.CUSTOM, value: makeCSBFormula(`current * (${expression})`) };
     }
     if (legacy?.mode === ACTIVE_EFFECT_MODE.OVERRIDE) {
       return { ...normalized, mode: ACTIVE_EFFECT_MODE.OVERRIDE, value: legacy.value };

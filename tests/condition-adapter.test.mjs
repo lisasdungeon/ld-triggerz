@@ -117,7 +117,7 @@ test('ConditionAdapter.apply: status-linked conditions with changes create an Ac
   const created = actor.calls.createEmbeddedDocuments[0].data[0];
   assert.deepEqual(created.statuses, ['bloodied']);
   assert.equal(created.changes[0].mode, 0);
-  assert.equal(created.changes[0].value, '${ ETO_check + (-0.1) }$');
+  assert.equal(created.changes[0].value, '${ current + (-0.1) }$');
 });
 
 test('ConditionAdapter.apply: syncs changes onto an existing matching status effect', async () => {
@@ -141,13 +141,13 @@ test('ConditionAdapter.apply: syncs changes onto an existing matching status eff
   assert.equal(actor.calls.createEmbeddedDocuments.length, 0);
   assert.equal(updates.length, 1);
   assert.equal(updates[0].changes[0].mode, 0);
-  assert.equal(updates[0].changes[0].value, '${ ETO_check + (-0.1) }$');
-  assert.equal(result[0].changes[0].value, '${ ETO_check + (-0.1) }$');
+  assert.equal(updates[0].changes[0].value, '${ current + (-0.1) }$');
+  assert.equal(result[0].changes[0].value, '${ current + (-0.1) }$');
 });
 
 test('ConditionAdapter.apply: returns existing effects when changes are already synced', async () => {
   const adapter = makeAdapter();
-  const changes = [{ key: 'system.props.ETO_check', mode: 0, value: '${ ETO_check + (-0.1) }$' }];
+  const changes = [{ key: 'system.props.ETO_check', mode: 0, value: '${ current + (-0.1) }$' }];
   const effect = {
     id: 'eff1',
     statuses: ['bloodied'],
