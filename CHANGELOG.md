@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.8 - 2026-08-13
+
+- Fixed CSB 6 ActiveEffect math: keep native Add/Multiply/Override for `system.props.*` instead of converting them to Custom `current` formulas that CSB drops during `computeEffectChanges`.
+- Reverse-migrates previously saved Custom `current + ()` / `current * ()` formulas back to native Add/Multiply on save and apply.
+
 ## 1.0.7 - 2026-08-13
 
 - Fixed status-linked conditions so Advanced Effect Changes are applied instead of being dropped by `toggleStatusEffect`.

@@ -10,6 +10,8 @@ const PROPS_PREFIX = "props.";
 const FORMULA_START = "${";
 const FORMULA_END = "}$";
 const NUMERIC_TEXT = /^-?(?:\d+|\d*\.\d+)$/;
+const LEGACY_ADD_FORMULA = /^current\s*\+\s*\((.+)\)$/;
+const LEGACY_MULTIPLY_FORMULA = /^current\s*\*\s*\((.+)\)$/;
 
 export function trimEffectText(value) {
   return String(value ?? "").trim();
@@ -51,22 +53,43 @@ export function makeCSBFormula(expression) {
   return FORMULA_START + " " + expression + " " + FORMULA_END;
 }
 
+function restoreLegacyCSBMath(change) {
+  if (Number(change.mode) !== ACTIVE_EFFECT_MODE.CUSTOM || !isCSBEffectKey(change.key)) return null;
+  const formula = unwrapCSBFormula(change.value);
+  if (!formula) return null;
+
+  const addMatch = formula.match(LEGACY_ADD_FORMULA);
+  if (addMatch) {
+    const value = trimEffectText(addMatch[1]);
+    if (value) return { ...change, mode: ACTIVE_EFFECT_MODE.ADD, value };
+  }
+
+  const multiplyMatch = formula.match(LEGACY_MULTIPLY_FORMULA);
+  if (multiplyMatch) {
+    const value = trimEffectText(multiplyMatch[1]);
+    if (value) return { ...change, mode: ACTIVE_EFFECT_MODE.MULTIPLY, value };
+  }
+
+  // Prior OVERRIDE conversion was CUSTOM with a bare numeric formula.
+  if (NUMERIC_TEXT.test(formula)) {
+    return { ...change, mode: ACTIVE_EFFECT_MODE.OVERRIDE, value: formula };
+  }
+
+  return null;
+}
+
 export function normalizeEffectChange(change) {
   const mode = Number(change?.mode ?? ACTIVE_EFFECT_MODE.CUSTOM);
   const normalized = { ...change, mode, value: trimEffectText(change?.value) };
-  const expression = csbValueExpression(normalized.value);
-  if (isCSBEffectKey(normalized.key) && expression) {
-    if (mode === ACTIVE_EFFECT_MODE.ADD) {
-      return { ...normalized, mode: ACTIVE_EFFECT_MODE.CUSTOM, value: makeCSBFormula(`current + (${expression})`) };
-    }
-    if (mode === ACTIVE_EFFECT_MODE.MULTIPLY) {
-      return { ...normalized, mode: ACTIVE_EFFECT_MODE.CUSTOM, value: makeCSBFormula(`current * (${expression})`) };
-    }
-    if (mode === ACTIVE_EFFECT_MODE.OVERRIDE) {
-      return { ...normalized, mode: ACTIVE_EFFECT_MODE.CUSTOM, value: makeCSBFormula(expression) };
-    }
+  const restored = restoreLegacyCSBMath(normalized);
+  if (restored) return restored;
+
+  // CSB prepareData applies ADD/MULTIPLY/OVERRIDE through Foundry applyChange.
+  // CUSTOM formulas that use `current` are expanded earlier in computeEffectChanges
+  // without a `current` binding, so those changes are dropped. Keep native modes.
+  if (isCSBPropPath(normalized.value)) {
+    return { ...normalized, value: makeCSBFormula(csbPathExpression(normalized.value)) };
   }
-  if (isCSBPropPath(normalized.value)) return { ...normalized, value: makeCSBFormula(csbPathExpression(normalized.value)) };
   return normalized;
 }
 

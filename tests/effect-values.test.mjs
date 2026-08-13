@@ -60,25 +60,104 @@ test('csbValueExpression: non-numeric, non-prop, non-formula text resolves to em
   assert.equal(csbValueExpression(''), '');
 });
 
-test('normalizeEffectChange: an ADD onto a CSB prop path becomes a CUSTOM current+() formula', () => {
-  const result = normalizeEffectChange({ key: 'props.bloodCharge', mode: 2, value: '3' });
-  assert.equal(result.mode, 0);
-  assert.equal(result.value, '${ current + (3) }$');
+test('normalizeEffectChange: ADD onto a CSB prop path keeps native ADD with a plain value', () => {
+  const result = normalizeEffectChange({ key: 'system.props.ETO_check', mode: 2, value: '-0.1' });
+  assert.equal(result.mode, 2);
+  assert.equal(result.value, '-0.1');
 });
 
-test('normalizeEffectChange: a MULTIPLY onto a CSB prop path becomes a CUSTOM current*() formula', () => {
+test('normalizeEffectChange: MULTIPLY onto a CSB prop path keeps native MULTIPLY', () => {
   const result = normalizeEffectChange({ key: 'props.bloodCharge', mode: 1, value: '2' });
-  assert.equal(result.mode, 0);
-  assert.equal(result.value, '${ current * (2) }$');
+  assert.equal(result.mode, 1);
+  assert.equal(result.value, '2');
 });
 
-test('normalizeEffectChange: an OVERRIDE onto a CSB prop path becomes a CUSTOM formula with the raw expression', () => {
+test('normalizeEffectChange: OVERRIDE onto a CSB prop path keeps native OVERRIDE', () => {
   const result = normalizeEffectChange({ key: 'props.bloodCharge', mode: 5, value: '7' });
-  assert.equal(result.mode, 0);
-  assert.equal(result.value, '${ 7 }$');
+  assert.equal(result.mode, 5);
+  assert.equal(result.value, '7');
 });
 
-test('normalizeEffectChange: CUSTOM mode on a CSB key is left as-is (no ADD/MULTIPLY/OVERRIDE branch matches)', () => {
+test('normalizeEffectChange: restores legacy CUSTOM current+() formulas back to ADD', () => {
+  const result = normalizeEffectChange({
+    key: 'system.props.ETO_check',
+    mode: 0,
+    value: '${ current + (-0.1) }$'
+  });
+  assert.equal(result.mode, 2);
+  assert.equal(result.value, '-0.1');
+});
+
+test('normalizeEffectChange: empty legacy current+() capture stays CUSTOM', () => {
+  const result = normalizeEffectChange({
+    key: 'system.props.ETO_check',
+    mode: 0,
+    value: '${ current + (   ) }$'
+  });
+  assert.equal(result.mode, 0);
+  assert.equal(result.value, '${ current + (   ) }$');
+});
+
+test('normalizeEffectChange: empty legacy current*() capture stays CUSTOM', () => {
+  const result = normalizeEffectChange({
+    key: 'props.bloodCharge',
+    mode: 0,
+    value: '${ current * (  ) }$'
+  });
+  assert.equal(result.mode, 0);
+});
+
+test('normalizeEffectChange: CUSTOM without formula wrappers is not restored', () => {
+  const result = normalizeEffectChange({
+    key: 'system.props.ETO_check',
+    mode: 0,
+    value: 'current + (1)'
+  });
+  assert.equal(result.mode, 0);
+  assert.equal(result.value, 'current + (1)');
+});
+
+test('normalizeEffectChange: non-CSB CUSTOM keys are not restored as legacy math', () => {
+  const result = normalizeEffectChange({
+    key: 'system.hp.value',
+    mode: 0,
+    value: '${ current + (1) }$'
+  });
+  assert.equal(result.mode, 0);
+  assert.equal(result.value, '${ current + (1) }$');
+});
+
+test('normalizeEffectChange: restores legacy CUSTOM current*() formulas back to MULTIPLY', () => {
+  const result = normalizeEffectChange({
+    key: 'props.bloodCharge',
+    mode: 0,
+    value: '${ current * (2) }$'
+  });
+  assert.equal(result.mode, 1);
+  assert.equal(result.value, '2');
+});
+
+test('normalizeEffectChange: restores legacy CUSTOM numeric formulas back to OVERRIDE', () => {
+  const result = normalizeEffectChange({
+    key: 'props.bloodCharge',
+    mode: 0,
+    value: '${ 7 }$'
+  });
+  assert.equal(result.mode, 5);
+  assert.equal(result.value, '7');
+});
+
+test('normalizeEffectChange: intentional CUSTOM formulas that are not legacy math stay CUSTOM', () => {
+  const result = normalizeEffectChange({
+    key: 'system.props.STR',
+    mode: 0,
+    value: '${ DEX + 2 }$'
+  });
+  assert.equal(result.mode, 0);
+  assert.equal(result.value, '${ DEX + 2 }$');
+});
+
+test('normalizeEffectChange: CUSTOM mode with a plain value is left as-is', () => {
   const result = normalizeEffectChange({ key: 'props.bloodCharge', mode: 0, value: '3' });
   assert.equal(result.mode, 0);
   assert.equal(result.value, '3');
@@ -107,7 +186,8 @@ test('normalizeEffectChanges: maps every change, and non-arrays become an empty 
   ];
   const result = normalizeEffectChanges(changes);
   assert.equal(result.length, 2);
-  assert.equal(result[0].value, '${ current + (3) }$');
+  assert.equal(result[0].mode, 2);
+  assert.equal(result[0].value, '3');
   assert.deepEqual(normalizeEffectChanges(null), []);
   assert.deepEqual(normalizeEffectChanges(undefined), []);
 });
