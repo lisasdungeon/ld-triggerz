@@ -48,14 +48,12 @@ export function csbValueExpression(value) {
   if (formula) return formula;
   if (isCSBPropPath(text)) return csbPathExpression(text);
   if (NUMERIC_TEXT.test(text)) return text;
-  // Bare CSB/math expressions typed in the Value field, e.g. ATK_calc * 0.08
   if (isBareCSBExpression(text)) return text;
   return "";
 }
 
 function isBareCSBExpression(text) {
   if (/^[A-Za-z_][A-Za-z0-9_]*$/.test(text)) return true;
-  // Hyphenated words like "not-numeric" are not math expressions.
   if (/[A-Za-z]-[A-Za-z]/.test(text)) return false;
   if (!/^[A-Za-z0-9_\s.+\-*/%(),]+$/.test(text)) return false;
   return /[+\-*/%()]/.test(text);
@@ -63,6 +61,11 @@ function isBareCSBExpression(text) {
 
 export function makeCSBFormula(expression) {
   return FORMULA_START + " " + expression + " " + FORMULA_END;
+}
+
+function storeDeltaValue(expression) {
+  if (NUMERIC_TEXT.test(expression)) return expression;
+  return makeCSBFormula(expression);
 }
 
 function extractLegacyDelta(change) {
@@ -106,10 +109,9 @@ export function normalizeEffectChange(change) {
   const initialMode = Number(change?.mode ?? ACTIVE_EFFECT_MODE.CUSTOM);
   let normalized = { ...change, mode: initialMode, value: trimEffectText(change?.value) };
 
-  // Foundry ADD concatenates when CSB props are strings ("1" + "-0.1" => "1-0.1").
-  // CSB Custom formulas are evaluated with mathjs, which does real numeric math.
-  // Use CSB's `current` token (the live prop value at apply time), not the component
-  // key - during CSB precompute the key is often still 0/reset.
+  // Foundry ADD concatenates CSB string props ("12" + "8" => "128").
+  // Keep native ADD/MULTIPLY so CSB can precompute delta formulas, then
+  // CSBActiveEffectPatch forces numeric math at apply time.
   if (isCSBEffectKey(normalized.key)) {
     const legacy = extractLegacyDelta(normalized);
     const mode = legacy?.mode ?? normalized.mode;
@@ -117,10 +119,10 @@ export function normalizeEffectChange(change) {
     const expression = csbValueExpression(value);
 
     if (mode === ACTIVE_EFFECT_MODE.ADD && expression) {
-      return { ...normalized, mode: ACTIVE_EFFECT_MODE.CUSTOM, value: makeCSBFormula(`current + (${expression})`) };
+      return { ...normalized, mode: ACTIVE_EFFECT_MODE.ADD, value: storeDeltaValue(expression) };
     }
     if (mode === ACTIVE_EFFECT_MODE.MULTIPLY && expression) {
-      return { ...normalized, mode: ACTIVE_EFFECT_MODE.CUSTOM, value: makeCSBFormula(`current * (${expression})`) };
+      return { ...normalized, mode: ACTIVE_EFFECT_MODE.MULTIPLY, value: storeDeltaValue(expression) };
     }
     if (legacy?.mode === ACTIVE_EFFECT_MODE.OVERRIDE) {
       return { ...normalized, mode: ACTIVE_EFFECT_MODE.OVERRIDE, value: legacy.value };

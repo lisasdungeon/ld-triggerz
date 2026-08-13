@@ -1,6 +1,6 @@
 import { LDTriggerz } from "./LDTriggerz.js";
 import { registerSceneControlHook } from "./hooks/UIHooks.js";
-import { patchComputablePhraseForCurrent } from "./CSBActiveEffectPatch.js";
+import { installCSBNumericPropEffectSupport } from "./CSBActiveEffectPatch.js";
 import { errorLog, errorMessage } from "./Logger.js";
 
 let activeInstance = null;
@@ -15,13 +15,13 @@ export function resetHooksForTests() {
 
 export function initHook(env = globalThis) {
   activeInstance = new LDTriggerz({ env }).init();
-  patchComputablePhraseForCurrent(env);
+  installCSBNumericPropEffectSupport(env);
   return activeInstance;
 }
 
 export function readyHook(env = globalThis) {
   if (!activeInstance) return false;
-  patchComputablePhraseForCurrent(env);
+  installCSBNumericPropEffectSupport(env);
   return activeInstance.ready();
 }
 

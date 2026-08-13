@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.12 - 2026-08-13
+
+- Fixed CSB Add/Multiply on Labels showing values like `ERROR12`. Custom `current` formulas were failing, then concatenating onto the label. LD Triggerz now keeps native Add/Multiply and forces numeric math for `system.props.*` so `12 + 8` becomes `20`, not `"128"` or `"ERROR12"`.
+- Mode Add with a bonus expression such as `${ ATK_calc * 0.08 }$` now adds onto the live label value.
+- Updated `docs/CSB-Effect-Changes.md` for the Add-delta approach.
+
 ## 1.0.11 - 2026-08-13
 
 - Fixed CSB Add/Multiply buffs that only applied the bonus (for example DEF became `ATK_calc * 0.08` instead of base DEF plus that bonus). Formulas now use CSB's `current` token, and LD Triggerz preserves `current` formulas through CSB precompute so apply-time math uses the live prop value.

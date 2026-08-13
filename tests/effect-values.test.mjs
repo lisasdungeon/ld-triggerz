@@ -69,28 +69,28 @@ test('csbValueExpression: non-numeric, non-prop, non-formula text resolves to em
   assert.equal(csbValueExpression('ATK_calc & 0.08'), '');
 });
 
-test('normalizeEffectChange: ADD onto a CSB prop becomes CUSTOM math using CSB current', () => {
+test('normalizeEffectChange: ADD onto a CSB prop keeps ADD with a numeric delta', () => {
   const result = normalizeEffectChange({ key: 'system.props.ETO_check', mode: 2, value: '-0.1' });
-  assert.equal(result.mode, 0);
-  assert.equal(result.value, '${ current + (-0.1) }$');
+  assert.equal(result.mode, 2);
+  assert.equal(result.value, '-0.1');
 });
 
 test('normalizeEffectChange: ADD accepts bare prop math without ${ }$ wrappers', () => {
   const result = normalizeEffectChange({ key: 'system.props.DEF', mode: 2, value: 'ATK_calc * 0.08' });
-  assert.equal(result.mode, 0);
-  assert.equal(result.value, '${ current + (ATK_calc * 0.08) }$');
+  assert.equal(result.mode, 2);
+  assert.equal(result.value, '${ ATK_calc * 0.08 }$');
 });
 
 test('normalizeEffectChange: ADD accepts wrapped prop math formulas', () => {
   const result = normalizeEffectChange({ key: 'system.props.DEF', mode: 2, value: '${ ATK_calc * 0.08 }$' });
-  assert.equal(result.mode, 0);
-  assert.equal(result.value, '${ current + (ATK_calc * 0.08) }$');
+  assert.equal(result.mode, 2);
+  assert.equal(result.value, '${ ATK_calc * 0.08 }$');
 });
 
-test('normalizeEffectChange: MULTIPLY onto a CSB prop becomes CUSTOM math using CSB current', () => {
+test('normalizeEffectChange: MULTIPLY onto a CSB prop keeps MULTIPLY with a numeric factor', () => {
   const result = normalizeEffectChange({ key: 'props.bloodCharge', mode: 1, value: '2' });
-  assert.equal(result.mode, 0);
-  assert.equal(result.value, '${ current * (2) }$');
+  assert.equal(result.mode, 1);
+  assert.equal(result.value, '2');
 });
 
 test('normalizeEffectChange: OVERRIDE onto a CSB prop keeps native OVERRIDE', () => {
@@ -99,27 +99,27 @@ test('normalizeEffectChange: OVERRIDE onto a CSB prop keeps native OVERRIDE', ()
   assert.equal(result.value, '7');
 });
 
-test('normalizeEffectChange: restores legacy current+() then keeps CSB current CUSTOM math', () => {
+test('normalizeEffectChange: restores legacy current+() to native ADD', () => {
   const result = normalizeEffectChange({
     key: 'system.props.ETO_check',
     mode: 0,
     value: '${ current + (-0.1) }$'
   });
-  assert.equal(result.mode, 0);
-  assert.equal(result.value, '${ current + (-0.1) }$');
+  assert.equal(result.mode, 2);
+  assert.equal(result.value, '-0.1');
 });
 
-test('normalizeEffectChange: restores legacy current*() then keeps CSB current CUSTOM math', () => {
+test('normalizeEffectChange: restores legacy current*() to native MULTIPLY', () => {
   const result = normalizeEffectChange({
     key: 'props.bloodCharge',
     mode: 0,
     value: '${ current * (2) }$'
   });
-  assert.equal(result.mode, 0);
-  assert.equal(result.value, '${ current * (2) }$');
+  assert.equal(result.mode, 1);
+  assert.equal(result.value, '2');
 });
 
-test('normalizeEffectChange: re-normalizing current CUSTOM math stays stable', () => {
+test('normalizeEffectChange: re-normalizing ADD/MULTIPLY deltas stays stable', () => {
   const once = normalizeEffectChange({ key: 'system.props.ETO_check', mode: 2, value: '-0.1' });
   const twice = normalizeEffectChange(once);
   assert.deepEqual(twice, once);
@@ -129,22 +129,22 @@ test('normalizeEffectChange: re-normalizing current CUSTOM math stays stable', (
   assert.deepEqual(mulTwice, mulOnce);
 });
 
-test('normalizeEffectChange: prop-key CUSTOM math migrates to current', () => {
+test('normalizeEffectChange: prop-key CUSTOM math migrates to native ADD/MULTIPLY', () => {
   const add = normalizeEffectChange({
     key: 'system.props.DEF',
     mode: 0,
     value: '${ DEF + (ATK_calc * 0.08) }$'
   });
-  assert.equal(add.mode, 0);
-  assert.equal(add.value, '${ current + (ATK_calc * 0.08) }$');
+  assert.equal(add.mode, 2);
+  assert.equal(add.value, '${ ATK_calc * 0.08 }$');
 
   const mul = normalizeEffectChange({
     key: 'props.bloodCharge',
     mode: 0,
     value: '${ bloodCharge * (2) }$'
   });
-  assert.equal(mul.mode, 0);
-  assert.equal(mul.value, '${ current * (2) }$');
+  assert.equal(mul.mode, 1);
+  assert.equal(mul.value, '2');
 });
 
 test('normalizeEffectChange: empty prop-key multiply capture stays CUSTOM', () => {
@@ -262,8 +262,8 @@ test('normalizeEffectChanges: maps every change, and non-arrays become an empty 
   ];
   const result = normalizeEffectChanges(changes);
   assert.equal(result.length, 2);
-  assert.equal(result[0].mode, 0);
-  assert.equal(result[0].value, '${ current + (3) }$');
+  assert.equal(result[0].mode, 2);
+  assert.equal(result[0].value, '3');
   assert.deepEqual(normalizeEffectChanges(null), []);
   assert.deepEqual(normalizeEffectChanges(undefined), []);
 });
