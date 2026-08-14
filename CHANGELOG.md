@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.13 - 2026-08-13
+
+- Fixed a startup console error (`UncomputableError: Uncomputable token "..."`) that CSB throws when an ActiveEffect's Add/Multiply value formula references a Label/formula prop (for example `ATK_calc`) that has not been computed yet. LD Triggerz now preserves that formula text through CSB's early precompute pass instead of letting CSB fail on it early.
+- Removed a rethrow in the Add/Multiply delta patch that, if a formula still could not resolve, would have escaped Foundry's own `applyActiveEffect` handling and could have broken an actor's whole sheet computation. Unresolvable deltas are now logged and skipped instead, matching CSB's own non-fatal fallback behavior.
+
 ## 1.0.12 - 2026-08-13
 
 - Fixed CSB Add/Multiply on Labels showing values like `ERROR12`. Custom `current` formulas were failing, then concatenating onto the label. LD Triggerz now keeps native Add/Multiply and forces numeric math for `system.props.*` so `12 + 8` becomes `20`, not `"128"` or `"ERROR12"`.

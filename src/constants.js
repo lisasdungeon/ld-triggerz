@@ -1,6 +1,6 @@
 export const MODULE_ID = "ld-triggerz";
 export const MODULE_TITLE = "LD Triggerz";
-export const MODULE_VERSION = "1.0.5";
+export const MODULE_VERSION = "1.0.13";
 export const SOCKET_CHANNEL = `module.${MODULE_ID}`;
 
 export const SETTING_KEYS = Object.freeze({

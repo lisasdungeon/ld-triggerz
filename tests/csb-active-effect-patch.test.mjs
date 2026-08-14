@@ -3,9 +3,12 @@ import test from 'node:test';
 import {
   applyNumericCSBPropChange,
   installCSBNumericPropEffectSupport,
+  isCSBFormulaText,
   isCSBSystemPropKey,
   patchCSBNumericPropEffectApply,
+  patchComputablePhrasePreserveActiveEffectFormulas,
   registerCSBNumericPropEffectHook,
+  resolveEffectDeltaAmount,
   toFiniteNumber
 } from '../src/CSBActiveEffectPatch.js';
 
@@ -168,6 +171,191 @@ test('installCSBNumericPropEffectSupport: still succeeds via hook when ActiveEff
 
 test('installCSBNumericPropEffectSupport: returns false when neither patch nor hook can install', () => {
   assert.equal(installCSBNumericPropEffectSupport({}), false);
+});
+
+test('isCSBFormulaText: only recognizes ${ ... }$ wrapped text', () => {
+  assert.equal(isCSBFormulaText('${ ATK_calc * 0.08 }$'), true);
+  assert.equal(isCSBFormulaText('ATK_calc * 0.08'), false);
+  assert.equal(isCSBFormulaText('8'), false);
+  assert.equal(isCSBFormulaText(null), false);
+});
+
+test('resolveEffectDeltaAmount: NaN when change itself is missing', () => {
+  assert.equal(Number.isNaN(resolveEffectDeltaAmount({}, null, undefined, {})), true);
+  assert.equal(Number.isNaN(resolveEffectDeltaAmount({}, undefined, undefined, {})), true);
+});
+
+test('resolveEffectDeltaAmount: prefers a numeric delta over everything else', () => {
+  assert.equal(resolveEffectDeltaAmount({}, { value: '${ ATK_calc }$' }, 5), 5);
+});
+
+test('resolveEffectDeltaAmount: falls back to a numeric change.value when delta is unusable', () => {
+  assert.equal(resolveEffectDeltaAmount({}, { value: '8' }, undefined), 8);
+});
+
+test('resolveEffectDeltaAmount: evaluates a CSB formula against the target props', () => {
+  const calls = [];
+  const targetDoc = { system: { props: { ATK_calc: 100 } }, templateSystem: 'kirito-template' };
+  const env = {
+    ComputablePhrase: {
+      computeMessageStatic(formula, props, options) {
+        calls.push({ formula, props, options });
+        return { result: props.ATK_calc * 0.08 };
+      }
+    }
+  };
+  const amount = resolveEffectDeltaAmount(targetDoc, { value: '${ ATK_calc * 0.08 }$' }, undefined, env);
+  assert.equal(amount, 8);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].formula, '${ ATK_calc * 0.08 }$');
+  assert.equal(calls[0].props.ATK_calc, 100);
+  assert.equal(calls[0].options.source, 'ld-triggerz.activeEffect.delta');
+  assert.equal(calls[0].options.triggerEntity, 'kirito-template');
+});
+
+test('resolveEffectDeltaAmount: NaN for non-numeric, non-formula text', () => {
+  assert.equal(Number.isNaN(resolveEffectDeltaAmount({}, { value: 'nope' }, undefined, {})), true);
+});
+
+test('resolveEffectDeltaAmount: NaN when a formula is present but ComputablePhrase is unavailable', () => {
+  assert.equal(Number.isNaN(resolveEffectDeltaAmount({}, { value: '${ ATK_calc }$' }, undefined, {})), true);
+});
+
+test('resolveEffectDeltaAmount: NaN when the formula throws (e.g. UncomputableError)', () => {
+  const env = {
+    ComputablePhrase: {
+      computeMessageStatic() {
+        throw new Error('Uncomputable token "ATK_calc"');
+      }
+    }
+  };
+  assert.equal(Number.isNaN(resolveEffectDeltaAmount({}, { value: '${ ATK_calc }$' }, undefined, env)), true);
+});
+
+test('applyNumericCSBPropChange: a finite current with an unresolvable non-formula amount is skipped, not logged', () => {
+  const changes = {};
+  const ok = applyNumericCSBPropChange(
+    {},
+    { key: 'system.props.DEF', mode: 2, value: 'garbage' },
+    '5',
+    undefined,
+    changes
+  );
+  assert.equal(ok, false);
+  assert.equal(Object.keys(changes).length, 0);
+});
+
+test('applyNumericCSBPropChange: resolves a formula delta through the env ComputablePhrase', () => {
+  const changes = {};
+  const targetDoc = { system: { props: { ATK_calc: 100, DEF: 10 } } };
+  const env = {
+    ComputablePhrase: {
+      computeMessageStatic(formula, props) {
+        return { result: props.ATK_calc * 0.08 };
+      }
+    }
+  };
+  const ok = applyNumericCSBPropChange(
+    targetDoc,
+    { key: 'system.props.DEF', mode: 2, value: '${ ATK_calc * 0.08 }$' },
+    '10',
+    undefined,
+    changes,
+    env
+  );
+  assert.equal(ok, true);
+  assert.equal(changes['system.props.DEF'], 18);
+});
+
+test('applyNumericCSBPropChange: an unresolvable formula is logged and skipped, never thrown', () => {
+  const consoleCalls = [];
+  const notifications = [];
+  const changes = {};
+  const targetDoc = { system: { props: {} } };
+  const env = {
+    console: { error: (...args) => consoleCalls.push(args) },
+    ui: { notifications: { error: (message) => notifications.push(message) } },
+    ComputablePhrase: {
+      computeMessageStatic() {
+        throw new Error('Uncomputable token "ATK_calc"');
+      }
+    }
+  };
+  assert.doesNotThrow(() => {
+    const ok = applyNumericCSBPropChange(
+      targetDoc,
+      { key: 'system.props.ATK_calc', mode: 2, value: '${ ATK_calc * 0.08 }$' },
+      '10',
+      undefined,
+      changes,
+      env
+    );
+    assert.equal(ok, false);
+  });
+  assert.equal(Object.keys(changes).length, 0);
+  assert.equal(consoleCalls.length, 1);
+  assert.match(consoleCalls[0][0], /Uncomputable active effect delta for system\.props\.ATK_calc/);
+  assert.equal(notifications.length, 1);
+});
+
+test('patchComputablePhrasePreserveActiveEffectFormulas: no-op without ComputablePhrase', () => {
+  assert.equal(patchComputablePhrasePreserveActiveEffectFormulas({}), false);
+  assert.equal(patchComputablePhrasePreserveActiveEffectFormulas({ ComputablePhrase: {} }), false);
+});
+
+test('patchComputablePhrasePreserveActiveEffectFormulas: patches once and passes through successful computations', () => {
+  const calls = [];
+  const env = {
+    ComputablePhrase: {
+      computeMessageStatic(phrase, props, options) {
+        calls.push(phrase);
+        return { result: 'fine' };
+      }
+    }
+  };
+  assert.equal(patchComputablePhrasePreserveActiveEffectFormulas(env), true);
+  assert.equal(patchComputablePhrasePreserveActiveEffectFormulas(env), true);
+  assert.equal(env.ComputablePhrase.computeMessageStatic('hello', {}, {}).result, 'fine');
+  assert.deepEqual(calls, ['hello']);
+});
+
+test('patchComputablePhrasePreserveActiveEffectFormulas: preserves formula text when an active effect value is uncomputable', () => {
+  const env = {
+    ComputablePhrase: {
+      computeMessageStatic() {
+        throw new Error('Uncomputable token "ATK_calc"');
+      }
+    }
+  };
+  patchComputablePhrasePreserveActiveEffectFormulas(env);
+  const result = env.ComputablePhrase.computeMessageStatic('${ ATK_calc * 0.08 }$', {}, { source: 'activeEffect.Rempart.value' });
+  assert.equal(result.result, '${ ATK_calc * 0.08 }$');
+});
+
+test('patchComputablePhrasePreserveActiveEffectFormulas: rethrows for a missing phrase', () => {
+  const env = {
+    ComputablePhrase: {
+      computeMessageStatic() {
+        throw new Error('boom');
+      }
+    }
+  };
+  patchComputablePhrasePreserveActiveEffectFormulas(env);
+  assert.throws(() => env.ComputablePhrase.computeMessageStatic(undefined, {}, { source: 'activeEffect.Rempart.value' }), /boom/);
+});
+
+test('patchComputablePhrasePreserveActiveEffectFormulas: rethrows for non-matching sources or non-formula text', () => {
+  const env = {
+    ComputablePhrase: {
+      computeMessageStatic() {
+        throw new Error('boom');
+      }
+    }
+  };
+  patchComputablePhrasePreserveActiveEffectFormulas(env);
+  assert.throws(() => env.ComputablePhrase.computeMessageStatic('${ ATK_calc }$', {}, { source: 'activeEffect.Rempart.key' }), /boom/);
+  assert.throws(() => env.ComputablePhrase.computeMessageStatic('plain text', {}, { source: 'activeEffect.Rempart.value' }), /boom/);
+  assert.throws(() => env.ComputablePhrase.computeMessageStatic('${ ATK_calc }$', {}, {}), /boom/);
 });
 
 test('installCSBNumericPropEffectSupport: installs patch and hook', () => {

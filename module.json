@@ -11,14 +11,14 @@
       "patreon": "https://patreon.com/LisasDungeon"
     }
   ],
-  "version": "1.0.12",
+  "version": "1.0.13",
   "compatibility": {
     "minimum": 13,
     "verified": 14
   },
   "url": "https://github.com/lisasdungeon/ld-triggerz",
   "manifest": "https://github.com/lisasdungeon/ld-triggerz/releases/latest/download/module.json",
-  "download": "https://github.com/lisasdungeon/ld-triggerz/releases/download/v1.0.12/ld-triggerz.zip",
+  "download": "https://github.com/lisasdungeon/ld-triggerz/releases/download/v1.0.13/ld-triggerz.zip",
   "readme": "https://github.com/lisasdungeon/ld-triggerz/blob/main/README.md",
   "changelog": "https://github.com/lisasdungeon/ld-triggerz/blob/main/CHANGELOG.md",
   "license": "https://github.com/lisasdungeon/ld-triggerz/blob/main/LICENSE",
