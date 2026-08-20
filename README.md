@@ -2,7 +2,7 @@
 
 **System-agnostic trigger automation and condition control for Foundry VTT.**
 
-- Version: `1.0.14`
+- Version: `1.0.15`
 - Compatibility: Foundry VTT `13+` (verified `14`)
 
 LD Triggerz lets you build reactive rules that watch actor and token data, then automatically apply, remove, or toggle conditions - or run a macro - when the data crosses the threshold you set. No scripting required.

@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.15
+
+- Import-data and hub-refresh socket events are ignored unless the payload `userId` belongs to a GM
+- Socket emits now include that `userId`
+- Download URL uses `releases/latest/download/module.zip`
+- Module version constant matches the manifest
+
 ## 1.0.14
 
 - README version now matches the manifest

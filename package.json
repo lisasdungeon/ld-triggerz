@@ -1,6 +1,6 @@
 {
   "name": "ld-triggerz",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "description": "System-agnostic trigger automation and condition control for Foundry VTT.",
   "main": "main.js",
   "type": "module",
