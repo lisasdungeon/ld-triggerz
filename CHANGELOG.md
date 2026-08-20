@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.14
+
+- README version now matches the manifest
+
 ## 1.0.13 - 2026-08-13
 
 - Fixed a startup console error (`UncomputableError: Uncomputable token "..."`) that CSB throws when an ActiveEffect's Add/Multiply value formula references a Label/formula prop (for example `ATK_calc`) that has not been computed yet. LD Triggerz now preserves that formula text through CSB's early precompute pass instead of letting CSB fail on it early.
